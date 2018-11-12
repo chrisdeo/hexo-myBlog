@@ -45,8 +45,8 @@ cache:
 # For example, you put your favicons into `hexo-site/source/images` directory.
 # Then need to rename & redefine they on any other names, otherwise icons from Next will rewrite your custom icons in Hexo.
 favicon:
-  small: /images/favicon-16x16-next.png
-  medium: /images/favicon-32x32-next.png
+  small: /images/fav-logo.png
+  medium: /images/fav-logo.png
   apple_touch_icon: /images/apple-touch-icon-next.png
   safari_pinned_tab: /images/logo.svg
   #android_manifest: /images/manifest.json
@@ -61,12 +61,12 @@ footer:
   # Specify the date when the site was setup.
   # If not defined, current year will be used.
   #since: 2015
-
+  description: 三千落樱与尔同眠
   # Icon between year and copyright info.
   icon:
     # Icon name in fontawesome, see: https://fontawesome.com/v4.7.0/icons
     # `heart` is recommended with animation in red (#ff0000).
-    name: user
+    name: slideshare
     # If you want to animate the icon, set it to true.
     animated: false
     # Change the color of icon, using Hex Code.
@@ -85,7 +85,7 @@ footer:
     # Theme & scheme info link (Theme - NexT.scheme).
     enable: true
     # Version info of NexT after scheme info (vX.X.X).
-    version: true
+    version: false
   # -------------------------------------------------------------
   # Beian icp information for Chinese users. In China, every legal website should have a beian icp in website footer.
   # http://www.miitbeian.gov.cn
@@ -143,7 +143,7 @@ menu:
   archives: /archives/ || archive
   schedule: /schedule/ || calendar
   sitemap: /sitemap.xml || sitemap
-  commonweal: /404/ || heartbeat
+  # commonweal: /404/ || heartbeat
 
 # Enable/Disable menu icons / item badges.
 menu_settings:
@@ -896,8 +896,8 @@ vendors:
   # Internal version: 2.1.3
   # Example:
   # jquery: //cdn.jsdelivr.net/npm/jquery@2.1.3/dist/jquery.min.js
-  # jquery: //cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js
-  jquery:
+  jquery: //cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js
+  # jquery:
 
   # Internal version: 2.1.5
   # See: http://fancyapps.com/fancybox
@@ -949,7 +949,7 @@ vendors:
   # Example:
   # fontawesome: //cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css
   # fontawesome: //cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.2/css/font-awesome.min.css
-  fontawesome:
+  fontawesome: //maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css
 
   # Internal version: 2.4.1
   # See: https://www.algolia.com
