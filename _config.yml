@@ -76,6 +76,15 @@ plugins: hexo-generate-feed
 ## Themes: https://hexo.io/themes/
 theme: next
 
+githubEmojis:
+  enable: true
+  className: github-emoji
+  inject: true
+  styles:
+    font-size: 1rem
+    font-weight: bold
+  customEmojis:
+
 # Deployment
 ## Docs: https://hexo.io/docs/deployment.html
 deploy:
