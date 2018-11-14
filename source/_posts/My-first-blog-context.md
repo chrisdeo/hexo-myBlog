@@ -1,7 +1,7 @@
 ---
 title: What is Markdown?
 date: 2018-11-10 23:21:28
-tags: markdown语法
+tags: markdown
 ---
 ![](My-first-blog-context/markdown.jpg)
 
