@@ -54,7 +54,7 @@
   #}
   {% if theme.footer.theme.version %} v{{ version }}{% endif %}{#
 #}</div>
-  <div class="post-count">{{theme.footer.countDescription}} : {{totalcount(site)}}</div>
+  <div class="post-count">{{theme.footer.countDescription}}{{totalcount(site)}}{{theme.footer.fontName}}</div>
 {% endif %}
 
 {% if theme.footer.custom_text %}

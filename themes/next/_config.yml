@@ -63,7 +63,8 @@ footer:
   #since: 2015
   description: 三千落樱与尔同眠
   #wordcount
-  countDescription: 咸鱼累计码字
+  countDescription: 咸鱼竟然码了
+  fontName: 字，恐怖如斯
   # Icon between year and copyright info.
   icon:
     # Icon name in fontawesome, see: https://fontawesome.com/v4.7.0/icons
