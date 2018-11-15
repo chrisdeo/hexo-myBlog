@@ -51,8 +51,10 @@
 {% if theme.footer.theme.enable %}
   <div class="theme-info">{#
   #}{{ __('footer.theme') }} – {{theme.footer.description}}{#
-  #}{% if theme.footer.theme.version %} v{{ version }}{% endif %}{#
+  #}
+  {% if theme.footer.theme.version %} v{{ version }}{% endif %}{#
 #}</div>
+  <div class="post-count">{{theme.footer.countDescription}} : {{totalcount(site)}}</div>
 {% endif %}
 
 {% if theme.footer.custom_text %}

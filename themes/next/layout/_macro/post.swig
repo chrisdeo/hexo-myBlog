@@ -87,7 +87,6 @@
               {% else %}
                 {% set create_title = __('post.created') + __('symbol.colon') + full_date(post.date) %}
               {% endif %}
-
               <time title="{{ create_title }}" itemprop="dateCreated datePublished" datetime="{{ moment(post.date).format() }}">{#
               #}{{ date(post.date) -}}
               </time>
@@ -110,6 +109,10 @@
                 <time title="{{ __('post.modified') + __('symbol.colon') + full_date(post.updated) }}" itemprop="dateModified" datetime="{{ moment(post.updated).format() }}">{#
                 #}{{ date(post.updated) -}}
                 </time>
+                <span class="post-meta-divider">|</span>
+                <span title="{{ __('post.wordcount') }}">
+                  本文总计 {{ wordcount(post.content) }} 字
+                </span>
               {% endif %}
             {% endif %}
           </span>

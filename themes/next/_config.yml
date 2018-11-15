@@ -62,6 +62,8 @@ footer:
   # If not defined, current year will be used.
   #since: 2015
   description: 三千落樱与尔同眠
+  #wordcount
+  countDescription: 咸鱼累计码字
   # Icon between year and copyright info.
   icon:
     # Icon name in fontawesome, see: https://fontawesome.com/v4.7.0/icons
@@ -1037,3 +1039,12 @@ vendors:
 css: css
 js: js
 images: images
+
+# Post wordcount display settings
+# Dependencies: https://github.com/willin/hexo-wordcount
+post_wordcount:
+  item_text: true
+  wordcount: true
+  min2read: true
+  totalcount: true
+  separated_meta: true
