@@ -1,10 +1,11 @@
 ---
 title: Hexo+Next主题建站指南
+no-emoji: true
 date: 2018-11-14 10:11:25
 tags: Hexo
 ---
 
-> &emsp;本篇博文主要是记录通过Hexo搭建个人博客的历程以及遇到的一些坑，当然也提供了填坑方案 :laughing:。
+> &emsp;本篇博文主要是记录通过Hexo搭建个人博客的历程以及遇到的一些坑，当然也提供了填坑方案 {% github_emoji laughing %}。
 
 ## 相关依赖
 
@@ -29,7 +30,7 @@ npm install
 hexo server
 ```
 
-&emsp;&emsp;启动成功后，会默认在4000端口挂上，当然也可以通过`-p 指定端口号`进行修改，避免一些端口占用的问题。这一点跟其他web开发是差不多的，比如你正在开发React项目，又恰好也挂在了4000端口, :boom:。
+&emsp;&emsp;启动成功后，会默认在4000端口挂上，当然也可以通过`-p 指定端口号`进行修改，避免一些端口占用的问题。这一点跟其他web开发是差不多的，比如你正在开发React项目，又恰好也挂在了4000端口, {% github_emoji boom %}。
 
 &emsp;&emsp;其实一般到这里，按照官方文档以及一些网上的博客都没什么毛病，主要是后面我们需要将本地的Hexo项目给部署到Github Pages上，具体怎么部署，后面小节在描述(差点忘了这节是讲要装哪些依赖的)。
 
@@ -74,7 +75,7 @@ hexo d // hexo deploy的简写 部署到你的服务器上
 
 ### 添加Live2D插件
 
-&emsp;&emsp;可以看到Blog右下角有一只黑喵，这其实就是`hexo-helper-live2d`这个包里的模型之一，我们可以先执行以下命令：
+&emsp;&emsp;可以看到Blog右下角有一只黑喵，这其实就是`live2d-widget-model`这个包里的模型之一，我们可以先执行以下命令：
 
 &emsp;&emsp;`npm i hexo-helper-live2d --save`
 &emsp;&emsp;`npm i live2d-widget-model-hijiki --save`
@@ -87,21 +88,93 @@ live2d:
   scriptFrom: local # 默认
   pluginModelPath: assets/ # 模型文件相对与插件根目录路径
   model:
-    use: live2d-widget-model-wanko # npm-module package name
+    use: live2d-widget-model-hijiki # 替换成你装的live2d模型包
     scale: 1
     hHeadPos: 0.5
     vHeadPos: 0.618
   display:
-    superSample: 2
+    superSample: 2   
     width: 150
     height: 300
-    position: right
-    hOffset: 0
-    vOffset: -20
+    position: right  # 控制模型在哪一侧展示
+    hOffset: 0       # 水平偏移量，想远离main区域，取负值
+    vOffset: -20     # 垂直偏移量
   mobile:
-    show: true
+    show: true       # 移动端是否显示
     scale: 0.5
   react:
-    opacityDefault: 0.7
+    opacityDefault: 0.7   # 控制看板模型的透明度
     opacityOnHover: 0.2
 ```
+
+### 嵌入网易云音乐
+
+&emsp;&emsp;在页面上嵌入网易云音乐播放器，其实原理很简单，就是把一个iframe嵌入，当然这样会有一些安全问题，一些博客好像有限制这方面的操作，需要手动配置解除。一般嵌入流程如下：
+
+```
+  1. 进入网易音乐，找到自己想要导入音乐的歌单
+  2. 进入歌单，点击 生成外链播放器 链接 复制其中的HTML 代码
+  3. 在layout目录下找到你想要添加的位置，由于Hexo里的HTML是模板语法构造的，所以推荐在Chrome的控制台Element里找关键词，再在项目内全局检索，这样比较快。
+```
+
+### Canvas动画背景
+
+&emsp;&emsp;这个东西其实是Next主题里本身就有配置的，不过大部分在初始构建项目时，是被注释掉的，所以启动时没有加载对应库。然后我们在主题下的config.yml内找到`canvas_nest`的外部加载属性，打开一条注释，或者使用别的可用的CDN，然后再将 `enable` 置为 `true` 便可以在我们的博客中加载出canvas动画效果了。
+
+### 文章字数统计
+
+&emsp;&emsp;要开启字数统计我们需要先通过`npm i hexo-wordcount --save`安装依赖，然后再在主题下的config.yml内加入以下配置属性：
+
+```
+post_wordcount:
+  item_text: true
+  wordcount: true
+  min2read: true
+  totalcount: true
+  separated_meta: true
+```
+
+**全站字数统计:  totalcount(site)**
+**每篇文章字数统计:  wordcount(post.content)**
+
+配置完毕后，将上述统计函数放置你需要展示的HTML结构处，使用模板的方式调用。
+
+### emoji表情
+
+&emsp;&emsp;在做让页面显示emoji表情功能时是走了不少弯路的...参照网上的一些博文，先把hexo项目初始化自带的渲染markdown的包`hexo-renderer-marked`给卸载了，然后装了个`hexo-renderer-markdown-it`，还装了一些额外的库，最后发现还是无法渲染`:emoji变量名:`这种格式的emoji图片，最后发现其实github本身已经有支持这方面的库了，实现流程如下：
+
+安装依赖：
+  `npm install hexo-filter-github-emojis --save `
+  ***PS ：***
+  1. 如果你跟我一样前面移除了原有的渲染库，可以再执行`npm un hexo-renderer-markdown-it`, `npm i hexo-renderer-marked`恢复原有配置。
+  2. 这个命令安装的是最新的稳定版本，网上有些别的博客里使用的是1.X版本的，其内部构造HTML的方式不太一样，请衡量自己版本后再进行后续操作。
+
+主题config.yml配置：
+
+```
+githubEmojis:
+  enable: true
+  className: github-emoji
+  inject: true
+  styles:        #这里可以配置你的emoji表情大小 粗细，其实就是span的样式
+  customEmojis:    #定制你的emoji
+    定制的emoji名: url   #会先匹配你的url图片，如果没有匹配到会再到Github Emojis中去找相同命名的emoji
+```
+
+***问题：*** 在以上配置完后，通过`:emoji变量名:`的方式我的表情已经能够正常显示了，但是在开启文章折叠功能以后，`:emoji变量名:`似乎是遇到了解析问题，直接以文本形式展示了。
+
+后面在官方文档里看到了另外一种使用方式：
+
+```
+---
+title: Hello World  #你的文章标题
+no-emoji: true  #在标题下添加该配置行，原有的按冒号中间加变量名这种方式将失效
+---
+
+:tada: # 不会被解析
+
+{% github_emoji tada %} # 用该方式替代
+```
+
+修改后，解析恢复正常。
+
