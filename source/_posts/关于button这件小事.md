@@ -19,9 +19,11 @@ tags: button
 &emsp;&emsp;3. `<button></button>`在`<form>`内，点击会直接触发表单提交（除IE），原因是button本身也有type属性，在不显式声明改属性时，在IE下默认为button类型，而在其他浏览器中默认为submit类型，两种类型触发form的模式与input一致。
 &emsp;&emsp;4. 触发提交事件后，会进行页面跳转，url后会拼接格式如`?参数名1=表单值1&参数名2=表单值2`的数据。
 &emsp;&emsp;5. 如果你是自己在验证打console.log的时候，会由于页面跳转无法看到执行台的结果，我们可以通过`onclick="test();return false"`的方式来阻止该行为。
-&emsp;&emsp;6. antd中的`<Button>`渲染出的真实DOM结构是`<button><span></span></button>`。
+&emsp;&emsp;6. antd中的`<Button>`渲染出的真实DOM结构是`<button><span></span></button>`，可以根据Button的htmlType属性指定按钮类型。值得注意的是，该属性非button原生属性。
 
-### PS: a标签的跳转禁止
+**PS： 原生编写时，我们通过form标签中的name属性来获取表单引用。**
+
+## a标签的跳转禁止
 
 &emsp;&emsp;1. `<a href="javascript:void(0);">链接显示文本</a>`
 &emsp;&emsp;2. `<a href="javascript:;">链接显示文本</a>`
