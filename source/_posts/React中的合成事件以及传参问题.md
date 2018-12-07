@@ -148,10 +148,10 @@ class LoggingButton extends React.Component {
 &emsp;&emsp; `<button onClick={this.deleteRow.bind(this, id)}>Delete Row</button>`
 &emsp;&emsp; `<button onClick={(e) => this.deleteRow(id, e)}>Delete Row</button>`
 
-&emsp;&emsp; ***①bind的写法，如果只有参数this,合成事件e将会被隐式传递，额外的参数，在后面以逗号隔开。***
-&emsp;&emsp; ***②箭头函数的合成事件传参就不太一样了，首先需要显式传递，其次合成事件会被作为第二个参数传递。***
+&emsp;&emsp; ***①bind的写法，如果只有参数this,合成事件e将会被隐式传递，额外的参数，在后面以逗号隔开***
+&emsp;&emsp; ***②箭头函数的合成事件传参必须进行显式传递，合成事件的传参位置由你定义的函数体接收参数位置决定。***
 
-&emsp;&emsp; **其次：bind函数在声明时，且你需要往绑定的函数内传参，合成事件需要放在最后一个参数，如下图所示**
+&emsp;&emsp; **其次：bind函数在声明时，且你需要往绑定的函数内传参，合成事件需要放在最后一个参数（隐式传递），如下图所示**
 
 ```javascript
     preventPop(name, e){    //事件对象e要放在最后
@@ -167,3 +167,5 @@ class LoggingButton extends React.Component {
         );
     }
 ```
+
+&emsp;&emsp; **补充：如果我们在绑定箭头函数的时候错误闭合了函数，将会造成函数立执行问题，即渲染时，不断调用该函数。e.g `onClick={this.handleClick(params)}` handleClick是组件中声明的箭头函数，这种情况出现的原因往往是由于对传参的正确姿势认知不清晰造成的。**
