@@ -10,8 +10,7 @@ tags: nginx
 
 &emsp;&emsp; 1、在[官方地址](http://nginx.org/en/download.html)选择版本下载（gzip格式压缩的包.tar.gz后缀）
 &emsp;&emsp; 2、从WINDOWS本机上传(`rz -be`)到连接的LINUX集成环境（试过直接wget，但是文件不完整）
-&emsp;&emsp; 3、解压： `tar -zxvf nginx-x.x.x.tar.gz`
-<escape><!-- more --></escape>
+&emsp;&emsp; 3、解压： `tar -zxvf nginx-x.x.x.tar.gz` <escape><!-- more --></escape>
 &emsp;&emsp; 4、进入解压目录，先进行几部预备工作：
 &emsp;&emsp; &emsp;&emsp; ①安装C/C++编译器：`yum install gcc gcc-c++`
 &emsp;&emsp; &emsp;&emsp; ②安装PCRE库（rewrite）：https://ftp.pcre.org/pub/pcre/ 与前文描述下载NGINX方式一样。

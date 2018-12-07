@@ -33,7 +33,9 @@ function ActionLink() {
 
 &emsp;&emsp;在讨论这个问题前，我们需要先弄清楚**React中事件绑定函数的正确姿势**，最基本的绑定属性名驼峰写法就不多赘述了，核心问题是**类的方法是不会默认绑定this的**，为了能够正确地拿到预期的this值，我们可以通过bind方式以及箭头函数的方式来实现。
 
-1、bind绑定
+#### bind绑定
+
+***1.1 在构造函数内绑定***
 ```javascript
 class Toggle extends React.Component {
   constructor(props) {
@@ -58,7 +60,31 @@ class Toggle extends React.Component {
 }
 ```
 
-2、箭头函数
+***1.2 直接在函数绑定内bind***
+```javascript
+class Toggle extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {isToggleOn: true};
+  }
+
+  handleClick() {
+    this.setState(prevState => ({
+      isToggleOn: !prevState.isToggleOn
+    }));
+  }
+
+  render() {
+    return (
+      <button onClick={this.handleClick.bind(this)}>
+        {this.state.isToggleOn ? 'ON' : 'OFF'}
+      </button>
+    );
+  }
+}
+```
+
+#### 箭头函数
 ```javascript
 //官方文档中描述的属性初始化器语法
 class LoggingButton extends React.Component {
@@ -91,8 +117,29 @@ class LoggingButton extends React.Component {
   }
 }
 ```
+&emsp;&emsp; 当然*在回调函数中使用箭头函数*这种绑定方式是不推荐使用的，因为这样每次render都会返回一个不一样的匿名函数，如果将其作为属性往子组件传递，可能会造成额外的rerender。
 
-&emsp;&emsp; 当然在回调函数中使用箭头函数这种绑定方式是不推荐使用的，因为这样每次render都会返回一个不一样的匿名函数，如果将其作为属性往子组件传递，可能会造成额外的rerender。
+
+#### ::双冒号绑定(使用babel支持)
+
+&emsp;&emsp; 先简单描述一下双冒号运算符：双冒号左边是一个对象，右边是一个函数。该运算符会自动将左边的对象，作为上下文环境（即this对象），绑定到右边的函数上面，即`foo::bar`等价于`bar.bind(foo)`，除此之外，当双冒号左侧为空，右边为对象的函数方法时，等价于将该方法绑定在该对象上。举个栗子：`var method = ::obj.foo;`等价于`var method = obj::obj.foo;`等价于`var method = obj.foo.bind(obj);`。这样实质上还是一个bind绑定。
+
+```javascript
+//双冒号绑定
+class LoggingButton extends React.Component {
+  handleClick() {
+    console.log('this is:', this);
+  }
+
+  render() {
+    return (
+      <button onClick={::this.handleClick}>
+        Click me
+      </button>
+    );
+  }
+}
+```
 
 ### 传递参数姿势
 
