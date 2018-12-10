@@ -9,7 +9,7 @@ tags: React
 ## 什么是合成事件？
 
 &emsp;&emsp;根据[React官方文档](https://react.docschina.org/docs/events.html)所述，合成事件的英文术语为SyntheticEvent，我们调用的处理函数会接收一个SyntheticEvent的
-实例，它是一个跨浏览器的封装组合体，具有与浏览器原生事件一样的接口。这样讲可能不够直观，下面代码中的参数e就是合成事件。
+实例，它是一个跨浏览器的封装组合体，具有与浏览器原生事件一样的接口，我们在React里绑定事件函数默认传递的都是合成事件。
 
 ```javascript
 function ActionLink() {
