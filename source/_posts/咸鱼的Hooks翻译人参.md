@@ -70,11 +70,16 @@ tags: React Hooks
 
 ### useEffect
 
+&emsp;&emsp;`useEffect(didUpdate);`
+
 &emsp;&emsp;看到Effect这个词，第一念头是什么？副作用。副作用其实就是那些会影响我们组件并且无法在render中完成的操作。
+
+&emsp;&emsp;该函数接收一个包含命令式、可能含有副作用的代码的函数，像数据逻辑改变、订阅事件、定时、注册等其他可能引起副作用的函数都不被允许放在函数组件的主体内，如果这么做将会导致bug或者UI处理上的矛盾。
+
 
 &emsp;&emsp;useEffect提供了能够在函数组件中完成副作用任务的能力，它与class内的componentDidMount,componentDidUpdate,componentWillUnmount的周期目的一致，但被整合到了一个API中。
 
-&emsp;&emsp;当你调用useEffect时，发生了什么？React会在DOM完成刷新变化后，执行你的副作用函数，并且因为你的副作用函数在组件内声明，它可以访问其（作用域）中的state和props。
+&emsp;&emsp;当你调用useEffect时，发生了什么？React会在DOM完成刷新变化后，执行你的副作用函数，并且因为你的副作用函数在组件内声明，它可以访问其（作用域）中的state和props，我们可以把effects理解为React从纯函数世界通往命令式世界的一扇小窗。
 
 &emsp;&emsp;默认情况下，React在每次render后（包括首次render）执行我们的副作用函数。
 
