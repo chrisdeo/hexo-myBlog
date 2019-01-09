@@ -69,12 +69,15 @@ tags: CSS
 }
 .slide2 {
     background-image: url("../images/2.jpg");
+    display: none;
 }
 .slide3 {
     background-image: url("../images/3.jpg");
+    display: none;
 }
 .slide4 {
     background-image: url("../images/4.jpg");
+    display: none;
 }
 
 .fullfilled {
@@ -127,7 +130,7 @@ function changeImg(){
 slideImg();
 ```
 
-&emsp;&emsp;如此一个简易的轮播效果便实现了，效果见[传送门](http://www.chendiyou.com/cssDemo/lunbo)。
+&emsp;&emsp;如此一个简易的轮播效果便实现了，效果见[传送门](http://www.chendiyou.com/cssDemo/imageRollingSimplify)。
 
 ## 完整版的轮播实现
 
@@ -149,6 +152,7 @@ slideImg();
 ```css
     .orientation {
         position: absolute;
+        z-index: 1;
         top: 50%;
         transform: translateY(-50%);
         color: white;
@@ -171,3 +175,86 @@ slideImg();
 ```
 &emsp;&emsp;效果如下：
 ![](CSS应用-轮播/翅膀.jpg)
+
+&emsp;&emsp;给按钮绑定图片切换事件。
+
+```javascript
+    var left = document.querySelector('.left');
+    var right = document.querySelector('.right');
+
+    left.onclick = function() {
+        if (index == 0) {
+            index = pics.length-1;
+            changeImg();
+        } else {
+            --index;
+            changeImg();
+        }
+    }
+
+    right.onclick = function() {
+        if (index == pics.length -1) {
+            index = 0;
+            changeImg();
+        } else {
+            ++index;
+            changeImg();
+        }
+    }
+```
+
+### 装上“喷射器”
+
+&emsp;&emsp;增加与图片数量相对应的指定图片切换按钮。
+
+&emsp;&emsp;DOM结构的安排，我将按钮id按index序列排列，这样便于我通过**事件委托**来收集是哪一个按钮被触发了，并且可以直接通过`event.target.id`拿到这个index赋值给我轮播函数中的index。
+
+```html
+    <div class="downBox">
+        <div id="0"></div>
+        <div id="1"></div>
+        <div id="2"></div>
+        <div id="3"></div>
+    </div>
+```
+&emsp;&emsp;这里由于翅膀和喷射器都是更高一层次的存在，所以给一个z-index:1。
+
+```css
+    .downBox {
+        z-index: 1;
+        position: absolute;
+        bottom: .56rem;
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .downBox > div {
+        width: 3.34rem;
+        height: .48rem;
+        background-color: rgba(255, 255, 255, 0.623);
+        margin: 0 0.77rem;
+        cursor: pointer;
+    }    
+```
+
+&emsp;&emsp;这一块的JS逻辑主要是两块一是事件委托，获取按钮index，然后调用图片切换函数，这里我希望，切换时按钮样式颜色发生改变，同时也要修改backgroundColor属性。
+
+```javascript
+    downBox.onclick = function(e) {
+        index = e.target.id;
+        changeImg();
+    }    
+    function changeImg(){
+        for(var i=0;i<pics.length;i++){
+            pics[i].style.display = "none";
+            downGroup[i].style.backgroundColor = "rgba(255, 255, 255, 0.623)";
+        }
+        pics[index].style.display = "block";
+        downGroup[index].style.backgroundColor = "white";
+    }
+```
+
+&emsp;&emsp;这样就oxxk了！实际效果走一波[传送门](http://www.chendiyou.com/cssDemo/imageRollingFull)。
