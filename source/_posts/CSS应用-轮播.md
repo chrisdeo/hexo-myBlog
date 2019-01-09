@@ -174,7 +174,7 @@ slideImg();
     }    
 ```
 &emsp;&emsp;效果如下：
-![](CSS应用-轮播/翅膀.jpg)
+![](翅膀.jpg)
 
 &emsp;&emsp;给按钮绑定图片切换事件。
 
@@ -207,7 +207,7 @@ slideImg();
 
 &emsp;&emsp;增加与图片数量相对应的指定图片切换按钮。
 
-&emsp;&emsp;DOM结构的安排，我将按钮id按index序列排列，这样便于我通过**事件委托**来收集是哪一个按钮被触发了，并且可以直接通过`event.target.id`拿到这个index赋值给我轮播函数中的index。
+&emsp;&emsp;DOM结构的安排，我将按钮id按index序列排列，这样便于我通过**事件委托**来收集是哪一个按钮被触发了，并且可以直接通过`event.target.id`拿到这个index赋值给我轮播函数中的index。当然也可以使用自定义属性`data-x`，然后通过`event.dataset.x`去取值，anyway，条条大路通罗马。
 
 ```html
     <div class="downBox">
@@ -238,6 +238,10 @@ slideImg();
         margin: 0 0.77rem;
         cursor: pointer;
     }    
+
+    .downBox > div:first-child {
+        background-color: white;
+    }
 ```
 
 &emsp;&emsp;这一块的JS逻辑主要是两块一是事件委托，获取按钮index，然后调用图片切换函数，这里我希望，切换时按钮样式颜色发生改变，同时也要修改backgroundColor属性。
