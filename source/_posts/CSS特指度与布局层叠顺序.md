@@ -1,7 +1,10 @@
 ---
 title: CSS特指度与布局层叠顺序
 date: 2019-01-09 14:22:51
-tags: CSS 特指度 层叠顺序
+tags:
+  - CSS
+  - 特指度
+  - 层叠顺序
 ---
 
 > &emsp;ICE和层叠问题其实都是老问题了，本文只是挪一下之前的share。
@@ -32,7 +35,7 @@ tags: CSS 特指度 层叠顺序
 
 ### 怎么算？
 
-&emsp;&emsp;大家都是聪明人，举个栗子就够了：
+&emsp;&emsp;大家都是聪明人，举个栗子就够了：`div#0 span`，元素有div和span，一个id选择器，权就是1x2+100=102。
 
 ## 布局层叠顺序
 
@@ -52,4 +55,4 @@ tags: CSS 特指度 层叠顺序
 &emsp;&emsp;所以，其实只需要在主体的DOM前`insertBefore`需要的水印，然后包裹层设置溢出隐藏`overflow: hidden`即可。
 
 &emsp;&emsp;DOM布局如下：
-![](DOM.png)
+![](DOM.PNG)
