@@ -12,7 +12,7 @@ tags:
 &emsp;&emsp;2、伪元素选择器：就是有连续两个冒号的选择器，如`::first-line`、`::first-letter`、`::before`、`::after`等。
 &emsp;&emsp;3、后代选择器：选择所有合乎规则的后代元素。用空格连接。
 &emsp;&emsp;4、相邻后代选择器：仅选择儿子(一层后代)元素，用>连接。
-&emsp;&emsp;5、`>、~、+`选择器适用于IE7以上版本。
+&emsp;&emsp;5、`>、~、+`选择器适用于IE7以上版本。<escape><!-- more --></escape>
 &emsp;&emsp;6、通常把HTML标签分为两种：块级元素和内联元素。
 &emsp;&emsp;7、块级元素和`display: block`不是一回事，但是它们都具备一个基本特征:一个水平流只能单独显示一个元素。
 &emsp;&emsp;8、具有换行特性的"块级元素"(笔记7的综合体)，可以配合clear属性来清除浮动带来的影响。
