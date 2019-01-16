@@ -62,6 +62,6 @@ tags:
 
 ## 常见的width属性
 
-&emsp;&emsp;  clientWIdth：对象内的可视区域，是不包括滚动栏以及超出边界内容的长度的。
+&emsp;&emsp;  clientWidth：对象内的可视区域，是不包括滚动栏以及超出边界内容的长度的。
 &emsp;&emsp;  scrollWidth：对象内容（可以暂将文本在一个固定size的textarea内输入代入思考）的实际宽度，比如超出了容器的长度也要计算在内。
 &emsp;&emsp;  offsetWidth：元素的宽度，包括了滚动条的宽。然后此时判断屏宽，这里设置直接超出600px宽，直接置为600px（手机这一类屏幕中最大宽度约莫在这个范围），其他的进行比例计算：`docEl.style.fontSize = fz*(clientWidth / designWidth) + 'px'`。
