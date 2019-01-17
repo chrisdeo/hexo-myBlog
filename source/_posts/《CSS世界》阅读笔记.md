@@ -69,7 +69,8 @@ img[src] { visibility: visible; }
 &emsp;&emsp;34、`:empty`伪类选择器用来匹配无内容的元素，用伪元素`::after`生成的content内容不会影响实体内容。
 &emsp;&emsp;35、content动态生成值无法获取。
 &emsp;&emsp;36、`getComputedStyle`可以获取伪元素的计算样式，`window.getComputedStyle(DOM，"::after").content`。
-&emsp;&emsp;37、content内容生成应用：①辅助元素生成，如清除浮动：
+&emsp;&emsp;37、content内容生成应用：
+&emsp;&emsp;①辅助元素生成，如清除浮动：
 ```css
 .clear:after {
     content: '';
@@ -77,5 +78,21 @@ img[src] { visibility: visible; }
     clear: both;
 }
 ```
-&emsp;&emsp;再如等分空间的柱状图，[传送门](https://demo.cssworld.cn/4/1-7.php)，核心在于通过`:before`实现底对齐，`:after`实现两端对齐。②字符内容生成：[传送门](https://demo.cssworld.cn/4/1-8.php)，原理就是通过`@font-face`自定义字体集合，然后替换文本内容。除此之外，这个`content`也可以为Unicode字符，比如`\A`换行(LF)，`\D`回车(CR)。配合CSS3  animation的loading demo，[传送门](https://demo.cssworld.cn/4/1-9.php)。③图片生成，`content: url()`，适用于png、jpg、svg、ico、base64URL等，但是不支持CSS3渐变背景图(`linear-gradient`)。
+&emsp;&emsp;再如等分空间的柱状图，[传送门](https://demo.cssworld.cn/4/1-7.php)，核心在于通过`:before`实现底对齐，`:after`实现两端对齐。
+&emsp;&emsp;②字符内容生成：[传送门](https://demo.cssworld.cn/4/1-8.php)，原理就是通过`@font-face`自定义字体集合，然后替换文本内容。除此之外，这个`content`也可以为Unicode字符，比如`\A`换行(LF)，`\D`回车(CR)。配合CSS3  animation的loading demo，[传送门](https://demo.cssworld.cn/4/1-9.php)。
+&emsp;&emsp;③图片生成，`content: url()`，适用于png、jpg、svg、ico、base64URL等，但是不支持CSS3渐变背景图(`linear-gradient`)。
+&emsp;&emsp;④利用content开启符号闭合，一种使用`open-quote`和`close-quote`实现的方式：通过 `选择器 { quotes: '前引号插入内容' '后引号插入内容'; }`配合`选择器:before { content: open-quote; }`以及`选择器:after { content: close-quote; }`实现。另一种则是直接把这种`quote`放到`content`内容中直接书写：`伪元素before/after选择器: { content: '你要加的内容'; }`。
+&emsp;&emsp;⑤**通过attr属性设置content内容：`img::after { content: attr(alt) }`，注：attr内可以传入原生HTML属性以及自定义data-X属性且这些属性不能带引号。**
+&emsp;&emsp;⑥content计数器：这种应用，需要先掌握几个核心的方法属性，`{ counter-reset: 变量命名1 数值1 变量命名2 数值2 ···; }`这是一个初始化计数器的动作并且**能够同时指定多个计数器**，数值内容在CHROME下可以是负数，如果是小数则向下取整；但在FF和IE下不会识别，视作0处理；除了指定数值，还能够设置`none`和`inherit`来取消重置和继承重置。具体见[传送门](https://demo.cssworld.cn/4/1-11.php)。`counter-increment`属性的值可以是`counter-reset`指定的一个或多个关键字，后面可选跟随数字，表示每一次增加的值，缺省值为1。`counter-increment`可以被多次触发，即在`::before`和`::after`中的该属性都会被触发，然后通过`counter(关键字)`输出结果。`counter()/counters()`方法类似于CSS3的`calc()`方法，比较有意思的一点是，`counter()`还能接收第二个参数`style`，它对应的是`list-style-type`支持的属性值，即递增的显示可以不只是单纯数字，也可以是罗马字、英文等，见[传送门](https://demo.cssworld.cn/4/1-16.php)。**content里可以调用多个counter()**。`counters(name, string，style可选)`的`string`**传参需要引号包围，并且是必传**，它用来表示子序号的连接字符串，那子序号需要重新定义关键字么？其实不需要，`counter-reset`设定的关键字仅对他最近的层级生效(唯一性)，即同一个初始名，但其实不同嵌套初始化的不共享这个值**，见[传送门](https://demo.cssworld.cn/4/1-18.php)。**
+&emsp;&emsp;**注：设置了counter/counters方法显示输出样式的DOM在文档流中必须在设置`counter-increment`元素的后面才有技数效果。**
 &emsp;&emsp;38、**HTML5可以接受自定义标签，浏览器默认样式没有规范，会被应用缺省inline，向下兼容，IE8等低版本不识别，会直接显示其内容。**
+&emsp;&emsp;39、笔记16中，我们知道了设置`box-sizing: border-box`以后，`width`成了真正意义上的总宽度。但如果是具有块状特性的元素且内部padding足够大，怎么样算足够大？比如总宽度是100px，横向左右padding和为120px，那么最终宽度是120px。
+&emsp;&emsp;40、对内联元素来说，它们没有可视宽度和高度，即`clientHeight`和`clientWidth`永远是0。垂直方向上的行为表现完全受`line-height`和`vertical-align`的影响。
+&emsp;&emsp;41、内联元素的垂直padding，**可以用来扩大链接或按钮的点击区域，同时不会影响到现有布局**，还有一种`登陆 | 注册`管道符的demo，见[传送门](https://demo.cssworld.cn/4/2-2.php)。
+&emsp;&emsp;42、对于非替换元素的内联元素，不仅padding不会加入**行盒高度**计算，margin和border也不会参与计算，它们的**表现形式是在内联盒周围发生渲染**。
+&emsp;&emsp;43、**padding属性：**
+&emsp;&emsp;①不支持负值。
+&emsp;&emsp;②支持百分比，块级元素`div { padding: 50%; }`可以撸出一个正方形，但是内联元素由于有假想盒的存在(笔记25)，会有个额外的高度导致最终宽高不等。
+&emsp;&emsp;注：padding百分比无论是水平还是垂直方向上都是**相对于宽度**计算的。
+&emsp;&emsp;44、头图兼容性较好的做法(包括IE6在内的大部分浏览器)，[传送门](https://demo.cssworld.cn/4/2-3.php)。
+&emsp;&emsp;45、内联元素的padding在文字较多的时候可能会出现断行。
