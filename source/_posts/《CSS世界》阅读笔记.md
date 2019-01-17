@@ -96,3 +96,7 @@ img[src] { visibility: visible; }
 &emsp;&emsp;注：padding百分比无论是水平还是垂直方向上都是**相对于宽度**计算的。
 &emsp;&emsp;44、头图兼容性较好的做法(包括IE6在内的大部分浏览器)，[传送门](https://demo.cssworld.cn/4/2-3.php)。
 &emsp;&emsp;45、内联元素的padding在文字较多的时候可能会出现断行。
+&emsp;&emsp;46、标签元素存在内置padding，`ol/ul`内置padding单位是px。如果列表中的font-size很小，则`li`元素内的`ul`或`ol`左边缘就会离文本内容区域很远，反之font-size很大就会出现项目符号跑到元素外的情况。当`font-size`在12px-14px时，22px是一个较好的padding-left设定值，所有浏览器都能正常显示。不过为了更佳的体验，用content计数器用法更舒服。
+&emsp;&emsp;47、button的padding在设置为0的时候，在FF下依旧会保留左右的padding。可以通过`button::-moz-focus-inner { padding: 0; }`来解决这个兼容问题。
+&emsp;&emsp;48、IE7下button内文字过多会使左右padding逐渐变大。
+&emsp;&emsp;49、**padding可以配合background-clip属性实现一些CSS图形的绘制效果**。
