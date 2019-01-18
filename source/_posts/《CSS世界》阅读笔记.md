@@ -92,7 +92,14 @@ img[src] { visibility: visible; }
 &emsp;&emsp;42、对于非替换元素的内联元素，不仅padding不会加入**行盒高度**计算，margin和border也不会参与计算，它们的**表现形式是在内联盒周围发生渲染**。
 &emsp;&emsp;43、**padding属性：**
 &emsp;&emsp;①不支持负值。
-&emsp;&emsp;②支持百分比，块级元素`div { padding: 50%; }`可以撸出一个正方形，但是内联元素由于有假想盒的存在(笔记25)，会有个额外的高度导致最终宽高不等。
+&emsp;&emsp;②支持百分比，块级元素`div { padding: 50%; }`可以撸出一个正方形，但是内联元素由于有假想盒的存在(笔记25)，会有个额外的高度导致最终宽高不等，解决方案很简单，其实就是用控制内联高度的方式即`font-size`解决该问题：
+```css
+    span {
+        padding: 50%;
+        font-size: 0;
+        background-color: gray;
+    }
+```
 &emsp;&emsp;注：padding百分比无论是水平还是垂直方向上都是**相对于宽度**计算的。
 &emsp;&emsp;44、头图兼容性较好的做法(包括IE6在内的大部分浏览器)，[传送门](https://demo.cssworld.cn/4/2-3.php)。
 &emsp;&emsp;45、内联元素的padding在文字较多的时候可能会出现断行。
@@ -100,3 +107,58 @@ img[src] { visibility: visible; }
 &emsp;&emsp;47、button的padding在设置为0的时候，在FF下依旧会保留左右的padding。可以通过`button::-moz-focus-inner { padding: 0; }`来解决这个兼容问题。
 &emsp;&emsp;48、IE7下button内文字过多会使左右padding逐渐变大。
 &emsp;&emsp;49、**padding可以配合background-clip属性实现一些CSS图形的绘制效果**。
+&emsp;&emsp;50、**元素偏移尺寸：**对应元素的border box尺寸，如`offsetWidth`和`offsetHeight`。
+&emsp;&emsp;51、**元素内部尺寸：**对应元素内部区域尺寸，即padding box尺寸，包括padding但不包括border。如`clientWidth`和`clientHeight`。
+&emsp;&emsp;52、**元素外部尺寸：**对应元素外部区域尺寸，包括padding、border以及margin。即margin box尺寸，没有原生DOM API，JQ中可以使用`$().outerWidth(true)`和`$().outerHeight(true)`来控制。
+&emsp;&emsp;53、对于margin，元素设定width值或者保持"包裹性"的时候，margin对尺寸没有影响。只有在**空间可被充分利用**的条件下是可以被影响的，那啥是**空间可被充分利用**呢？比如说有父子DOM嵌套关系，分别有`father`和`son`的class，那么如果在`father`设置width，`son`不设置宽度，设置margin就会影响到自身的宽度，以下面代码为例，最后`son`宽度就是340px，并且这种条件下，垂直方向的高度也可以改变。
+```css
+<div class="father">
+    <div class="son"></div>
+</div>
+.father {
+    width: 300px;
+}
+.son {
+    margin: 0 -20px;
+}
+```
+&emsp;&emsp;那这种充分利用的特性带来了什么实际场景中的应用？比如：**一侧定宽的两栏自适应布局**，见[传送门](https://demo.cssworld.cn/4/3-1.php)。其实本质就是`margin`来扩充了父级的宽度，然后内部两栏，一栏为固定死的，另一栏自适应剩余部分的结果。再比如**表格间隙多余的最后一项消除的替代方案**，举个例子，我们想要我们的每一条`li`之间产生20px的间隙，那么一般来讲会设置一个`margin-right: 20px;`，但事实上，换行的时候，最后一项就会多出一个间隙，消除手段通常是在这个元素上生成的时候，附加一个`margin-right: 0;`的样式类或用CSS3的nth-of-type选择器(不考虑IE8)。**现在充分利用margin这种改变布局的特性，我们可以在父容器给一个`margin-right: -20px;`，子元素则根据剩余部分自适应，那么多余的20的px相当于就被抹除了！**
+&emsp;&emsp;54、**不同浏览器的滚动条触发规则：**Chrome是子元素超过content-box尺寸触发，IE和FF则是超过padding-box触发。这种规则会导致`padding-bottom`在IE和FF下失效。
+&emsp;&emsp;55、笔记54中我们知道了`padding-bottom`有兼容性问题，即在页面底部留白时，我们不应使用`padding`来控制，而可以转投笔记53中的利用特性，使用`margin`扩充纵向留白。
+&emsp;&emsp;56、**利用margin外部尺寸来实现等高布局，[传送门](https://demo.cssworld.cn/4/3-2.php)，核心见下面代码：**
+```css
+.column-box {
+    overflow: hidden;
+}
+.column-left,
+.column-right {
+    margin-bottom: -9999px;
+    padding-bottom: 9999px;
+}
+```
+&emsp;&emsp;57、**margin的百分比值同padding一样，无论是水平还是垂直方向上都是相对于宽度计算的。**
+&emsp;&emsp;58、**margin的合并问题：**
+&emsp;&emsp;①：只发生在块级元素上(不包括那些通过浮动和绝对定位产生块级特性的元素)。
+&emsp;&emsp;②：只发生在垂直方向上(前提是不通过`writing-mode`改变方向)。
+&emsp;&emsp;59、**margin的合并场景：**
+&emsp;&emsp;①：相邻兄弟元素margin合并。
+&emsp;&emsp;②：父级和第一个子元素或者最后一个子元素的合并(**如果父级没有声明垂直`margin`，子级声明的垂直`margin`将被合并到父级去，[传送门](https://demo.cssworld.cn/4/3-3.php)**)。
+&emsp;&emsp;60、引出笔记61前，让我们先温习一下啥是**BFC**，BFC英文全称是Block Formatting Context，即块状格式化上下文。指的是页面布局中的一块区域，它拥有自己的渲染规则，决定自己的子元素如何布局，并和其他元素的关系和作用。
+&emsp;&emsp;61、**如何触发BFC？**
+&emsp;&emsp;①根元素(即html)。
+&emsp;&emsp;②float属性不为none。
+&emsp;&emsp;③position属性为absoulute，fixed。
+&emsp;&emsp;④display为inline-block,table-cell,table-caption,flex,inline-flex。
+&emsp;&emsp;⑤overflow不为visiable时。
+&emsp;&emsp;62、**消除margin合并的方式：**
+&emsp;&emsp;***对于margin-top合并的情况:***
+&emsp;&emsp;①父元素设置为BFC。
+&emsp;&emsp;②父元素设置border-top。
+&emsp;&emsp;③父元素设置为padding-top。
+&emsp;&emsp;④父元素和第一个子元素之间添加内联元素进行分隔。
+&emsp;&emsp;***对于margin-bottom合并的情况:***
+&emsp;&emsp;①父元素设置为BFC。
+&emsp;&emsp;②父元素设置border-bottom。
+&emsp;&emsp;③父元素设置为padding-bottom。
+&emsp;&emsp;④父元素和最后一个子元素之间添加内联元素进行分隔。
+&emsp;&emsp;⑤父元素设置height、min-height或max-height。
