@@ -137,20 +137,22 @@ img[src] { visibility: visible; }
 }
 ```
 &emsp;&emsp;57、**margin的百分比值同padding一样，无论是水平还是垂直方向上都是相对于宽度计算的。**
-&emsp;&emsp;58、**margin的合并问题：**
+&emsp;&emsp;58、**像`<h1>、<p>、<ul>`这些标签是有默认垂直方向的`margin`值的，并且单位是`em`这种相对字体的单位。**这里作者说了他的理解，我觉得没啥毛病，即如果`margin`使用`px`这种绝对单位，当字体`font-size`变大了，那么整个容器其实宽高还是那么大就会造成内容臃肿在一起。而使用`em`它是根据父元素的`font-size`按比例算的，所以`margin`会跟着自适应变大，整个容器的排版依旧能够保持一致。
+&emsp;&emsp;59、**margin的合并问题：**
 &emsp;&emsp;①：只发生在块级元素上(不包括那些通过浮动和绝对定位产生块级特性的元素)。
 &emsp;&emsp;②：只发生在垂直方向上(前提是不通过`writing-mode`改变方向)。
-&emsp;&emsp;59、**margin的合并场景：**
+&emsp;&emsp;60、**margin的合并场景：**
 &emsp;&emsp;①：相邻兄弟元素margin合并。
 &emsp;&emsp;②：父级和第一个子元素或者最后一个子元素的合并(**如果父级没有声明垂直`margin`，子级声明的垂直`margin`将被合并到父级去，[传送门](https://demo.cssworld.cn/4/3-3.php)**)。
-&emsp;&emsp;60、引出笔记61前，让我们先温习一下啥是**BFC**，BFC英文全称是Block Formatting Context，即块状格式化上下文。指的是页面布局中的一块区域，它拥有自己的渲染规则，决定自己的子元素如何布局，并和其他元素的关系和作用。
-&emsp;&emsp;61、**如何触发BFC？**
+&emsp;&emsp;③：空块级元素的margin合并(这里这个空的块提不提供margin垂直方向上的值，它都会产生合并特性)。
+&emsp;&emsp;61、引出笔记61前，让我们先温习一下啥是**BFC**，BFC英文全称是Block Formatting Context，即块状格式化上下文。指的是页面布局中的一块区域，它拥有自己的渲染规则，决定自己的子元素如何布局，并和其他元素的关系和作用。
+&emsp;&emsp;62、**如何触发BFC？**
 &emsp;&emsp;①根元素(即html)。
 &emsp;&emsp;②float属性不为none。
 &emsp;&emsp;③position属性为absoulute，fixed。
 &emsp;&emsp;④display为inline-block,table-cell,table-caption,flex,inline-flex。
 &emsp;&emsp;⑤overflow不为visiable时。
-&emsp;&emsp;62、**消除margin合并的方式：**
+&emsp;&emsp;63、**消除margin合并的方式：**
 &emsp;&emsp;***对于margin-top合并的情况:***
 &emsp;&emsp;①父元素设置为BFC。
 &emsp;&emsp;②父元素设置border-top。
@@ -162,3 +164,65 @@ img[src] { visibility: visible; }
 &emsp;&emsp;③父元素设置为padding-bottom。
 &emsp;&emsp;④父元素和最后一个子元素之间添加内联元素进行分隔。
 &emsp;&emsp;⑤父元素设置height、min-height或max-height。
+&emsp;&emsp;64、**margin合并后的计算值：**
+&emsp;&emsp;①正正取大。
+&emsp;&emsp;②正负相加。
+&emsp;&emsp;③负负最负(转成绝对值，取大)。
+&emsp;&emsp;65、**margin合并的意义：**
+&emsp;&emsp;①兄弟元素合并：和em作用类似，为了排版更加舒适。
+&emsp;&emsp;②父子元素合并：在页面任何地方嵌套或直接插入空div都不会影响原本的块状布局。
+&emsp;&emsp;③自身margin合并：避免不小心遗落或者生成的空标签影响原本的排版和布局。
+&emsp;&emsp;66、**margin: auto的问题：**这个问题我觉得可以分为两种情况，第一种是元素**没有设置`width`和`height`**，**注意这里的设置即便值是`auto`也算设置**，它会自动填充父容器。另一种则是设置了宽高，这个时候前者的填充性被覆盖，根据"剩余空间"进行分配。
+&emsp;&emsp;67、关于利用margin: auto来进行水平垂直居中的应用，我在[<<到底怎么样才能水平垂直居中喔>>](http://www.chendiyou.com/2019/01/07/%E5%88%B0%E5%BA%95%E6%80%8E%E4%B9%88%E6%A0%B7%E6%89%8D%E8%83%BD%E6%B0%B4%E5%B9%B3%E5%9E%82%E7%9B%B4%E5%B1%85%E4%B8%AD%E5%96%94/)一文中有对其进行应用的例子，但是那只是在**水平方向上**利用了该特性，垂直方向上其实使用的是`transform`来移动。那为什么**容器定高，元素定高，`margin: auto`无法垂直方向上居中呢？**因为触发`margin: auto`计算的一个前提条件是**当width或height为auto时，元素是具有对应方向的自动填充特性的**。见笔记66中第二种情况，设置宽高后该特性将被覆盖。所以没办法在按这种规则计算分配空间。在前文我提到的另一篇博客中有另一个方案对绝对定位元素的垂直居中进行控制，即在**对向属性上同时设置值**，这个时候该元素会表现为"格式化宽度和格式化高度"，见笔记14。
+&emsp;&emsp;68、`margin: auto`的计算需要IE8及以上的浏览器才能支持。
+&emsp;&emsp;69、内联非替换元素的垂直margin无效，但替换元素的垂直margin有效，并且没有margin合并的问题，所以**图片永远不会发生margin合并**。
+&emsp;&emsp;70、`tr`，`td`或者`display: table-cell`，`display: table-row`的元素margin都是无效的。
+&emsp;&emsp;71、绝对定位元素非定位方向的margin值无效。
+&emsp;&emsp;72、**定高容器的子元素的margin-bottom或定宽容器的子元素的margin-right无效**，这个就比较经典了，我自己在写需求的时候，就有一个地方需要使用绝对定位设置`margin-right`定位，但是却发现无效了。怎么理解这个问题呢？当我们想通过margin属性改变自身位置时，**必须是和当前元素定位方向一样的margin属性才行，否则设定的margin只能影响后面的兄弟元素或父元素**。这里的定位方向又是啥？对一般元素，默认流是左侧以及上方，那么只能通过`margin-left`和`margin-top`来影响元素定位。但是如果通过`float: right`或者绝对定位设置`right`属性，就会改变定位方向，就可以通过另一侧设置了。
+&emsp;&emsp;73、`border-width`不支持百分比值，除了使用固定数值，还支持关键词如`thin`，等同1px；`medium`，默认值等同3px；`thick`，等同4px。
+&emsp;&emsp;74、`border-style`默认值为`none`。**你也可以通过设置`border-width: 0`来重置。**文中描述说如果同时对这两种属性进行设置，渲染性能最高？
+```css
+div {
+    border: 1px solid;
+    border-bottom: 0 none;  /* 渲染性能高的写法 */
+}
+```
+&emsp;&emsp;75、`border-style: dotted`在IE下和在CHROME、FF下表现形式不同，前者是小圆点，后者是小方点。由于CSS的`border-radius`是在IE9浏览器才开始支持的，所以之前版本的IE圆角实现可以利用这种特性来hack模拟，本质就是结合`overflow: hidden`来隐藏多余点(当我们想单独得到一个圆的时候)。
+```css
+    .box {
+        width:150px;
+        height: 150px;
+        overflow: hidden;
+    }
+    .dotted {
+        width:100%;
+        height: 100%;
+        border: 149px dotted #cd0000;
+    }
+```
+```html
+    <div class="box">
+        <div class="dotted"></div>
+    </div>
+```
+![](chrome.jpg)
+![](ie.jpg)
+&emsp;&emsp;76、`border-style: double`上下两线border实线，值为1px和2px时，与solid表现形式一致。当3px开始才有双线表现，所以有笔记73中的medium默认值。
+&emsp;&emsp;77、`border-color`在没有设定时，默认取color色值。
+&emsp;&emsp;78、`border`与`transparent`的巧妙配合：`color: transparent`在IE9以上才支持，而`border-color: transparent`在IE7就支持了。
+&emsp;&emsp;①右下角background定位：现在CSS3操作直接`background-position: right 数值 bottom 数值`即可。 文中提到的下面这种操作...em...我没实践出来。
+```css
+.box {
+    border-right: 50px solid transparent;
+    background-position: 100% 50%;
+}
+```
+&emsp;&emsp;②**增大移动端点击按钮的可触区域：**第一种是在外层嵌套标签专门控制区域，第二种则是利用其自身的`padding`或`bottom`扩充区域大小。而设定`padding`在我们使用外部font库时，可能会造成中间图案定位问题，所以最佳方案是**使用透明border增加点击区域[传送门](https://demo.cssworld.cn/4/4-2.php)。**
+&emsp;&emsp;③三角形等图片绘制。
+```css
+div {
+    width: 0;
+    border: 10px solid;
+    border-color: #f30 transparent transparent;
+}
+```
