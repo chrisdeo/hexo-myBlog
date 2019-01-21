@@ -232,14 +232,59 @@ div {
 &emsp;&emsp;81、我们常用的`vertical-align: middle`并不是等分线`mean-line`处，而是基线往上1/2个`x-height`处。**所以我们有通过`vertical-align: middle`来进行垂直居中时，其实它并不是容器的垂直居中，而是我们字体样式的垂直居中。**
 &emsp;&emsp;82、`ex`单位对应的就是`x-height`的高度，它是一个相对单位，不管字体字号如何改变，永远相对于这个变化。那么这个单位可以怎么利用呢？比如**基于ex单位的天然垂直居中对齐效果实例页面**，见[传送门](https://demo.cssworld.cn/5/1-1.php)。
 &emsp;&emsp;83、`<div>`内容为空的情况高度为0，当添加文字后，高度被撑起，但本质上这个撑起的高度是由行高`line-height`属性绝对的而不是`font-size`。
-&emsp;&emsp;84、前面我们提到了`font-size`，现在我们来看看`font-size`到底作用在啥子地方。首先，`line-height`的数值属性和百分比属性值都是相对于`font-size`计算的。而`vertical-align`又是根据`line-height`计算的，见笔记80。
-&emsp;&emsp;84、关于float，**浮动的本质就是为了实现文字环绕的效果**，文章原话。
-&emsp;&emsp;85、float特性：
+&emsp;&emsp;84、前面我们提到了`font-size`，现在我们来看看`font-size`到底作用在啥子地方。首先，`line-height`的数值属性和百分比属性值都是相对于`font-size`计算的。而`vertical-align`又是根据`line-height`计算的，见笔记80。以下面的代码块为计算样例，最终的`vertical-align = 16px *　1.5 *　-0.25 = -6px`。
+```css
+p {
+    font-size: 16px;
+    line-height: 1.5;
+}
+p > img {
+    vertical-align: -25%;
+}
+```
+&emsp;&emsp;然后我们看看`font-size`的关键字属性值。
+&emsp;&emsp;相对当前元素`font-size`计算的有：
+&emsp;&emsp;①larger，`<big>`标签对应`font-size`大小。
+&emsp;&emsp;②smaller，`<small>`标签对应`font-size`大小。
+&emsp;&emsp;与当前元素`font-size`无关，**仅受浏览器设置的字号**影响：
+&emsp;&emsp;①xx-large，和`<h1>`元素计算值一样。
+&emsp;&emsp;②x-large，和`<h2>`元素计算值一样。
+&emsp;&emsp;③large，和`<h3>`元素计算值相似(偏差值在1px以内)。
+&emsp;&emsp;④**medium**，`font-size`的初始值，和`<h4>`的元素计算值一样，为16px。
+&emsp;&emsp;⑤还有与large相对格式的small。
+&emsp;&emsp;85、浏览器默认`font-size`大小是16px，所以设置`font-size: 87.5%`和`font-size: 14px`是等价的。
+&emsp;&emsp;86、**Chrome下有一个12px的字号限制**，就是文字的font-size计算值不能小于12px，由于Chrome的特殊性，我们通常进行移动端em、rem适配的时候，就不能直接设置
+```css
+html {
+    font-size: 62.5%;
+}
+```
+&emsp;&emsp;这样计算结果是10px，换算成em，如果是直属父级，或rem就是1em/1rem，但是Chrome老哥说，我觉得不行，因为只要小于12px且不为0的大小我就觉得它是12px大小的，什么？你问是0的时候Chrome怎么看？那当然是0咯。那怎么弄呢，可以设置成625%，即100px。既便于计算又不会有之前的问题。
+&emsp;&emsp;87、**希望隐藏logo对应元素内的文字，除了`text-indent`缩进隐藏外，还可以通过设置`font-size: 0`。**
+&emsp;&emsp;88、`font-family`默认值由操作系统和浏览器共同决定。它支持两类属性值，一类是“字体名”，一类是“字体族”，如果字体名包含空格需要使用引号包裹，不区分大小写，且如果有多个字体设定将遵从从左往右依次匹配本地是否有对应的字体。
+&emsp;&emsp;字体名用法：
+```css
+body {
+    font-family: simsun;
+}
+body {
+    font-family: 'Microsoft Yahei', 'PingFang SC';
+}
+```
+&emsp;&emsp;字体族分类：
+&emsp;&emsp;①serif衬线字体
+&emsp;&emsp;②sans-serif无衬线字体
+&emsp;&emsp;③monospace等宽字体
+&emsp;&emsp;④cursive手写字体
+&emsp;&emsp;⑤fantasy奇幻字体
+&emsp;&emsp;⑥system-ui系统UI字体
+&emsp;&emsp;89、关于float，**浮动的本质就是为了实现文字环绕的效果**，文章原话。
+&emsp;&emsp;90、float特性：
 &emsp;&emsp;①**包裹性**，由两部分组成，包裹和自适应性。包裹可以理解为，具有`float`设定的容器的宽高将会以嵌套的内容宽高为表现。自适应则是浮动元素嵌套的元素如果是多个，将会自适应分配剩余空间。
 &emsp;&emsp;②**块状化**格式上下文(BFC)
 &emsp;&emsp;③破坏文档流
 &emsp;&emsp;④无任何margin合并
-&emsp;&emsp;86、笔记85中的第二条中，强调了块状化的说法，那么**什么是块状化？**即一旦float属性不为none，则display计算值将是`block`或者`table`。像以下的写法都是冗余的：
+&emsp;&emsp;91、笔记85中的第二条中，强调了块状化的说法，那么**什么是块状化？**即一旦float属性不为none，则display计算值将是`block`或者`table`。像以下的写法都是冗余的：
 ```css
 span {
     display: block;  /* 多余 */
