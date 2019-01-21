@@ -145,13 +145,13 @@ img[src] { visibility: visible; }
 &emsp;&emsp;①：相邻兄弟元素margin合并。
 &emsp;&emsp;②：父级和第一个子元素或者最后一个子元素的合并(**如果父级没有声明垂直`margin`，子级声明的垂直`margin`将被合并到父级去，[传送门](https://demo.cssworld.cn/4/3-3.php)**)。
 &emsp;&emsp;③：空块级元素的margin合并(这里这个空的块提不提供margin垂直方向上的值，它都会产生合并特性)。
-&emsp;&emsp;61、引出笔记61前，让我们先温习一下啥是**BFC**，BFC英文全称是Block Formatting Context，即块状格式化上下文。指的是页面布局中的一块区域，它拥有自己的渲染规则，决定自己的子元素如何布局，并和其他元素的关系和作用。
+&emsp;&emsp;61、引出笔记61前，让我们先温习一下啥是**BFC**，BFC英文全称是Block Formatting Context，即**块状**格式化上下文。BFC指的是页面布局中的一块区域，它拥有自己独有的内部渲染规则，**不受外部影响，同时也不会影响到外部区域**，所以BFC元素是不会发生margin重叠的情况;另外BFC也可以清除浮动带来的影响，原因也是那个不影响外部区域，假设它无法清除，那就会造成高度坍塌，破坏外部结构。除此之外，BFC还有一个很关键的用处：**自适应布局**，怎么自适应？当我们的元素形成BFC以后将不受外部影响，打个比方，如果他们同在一块浮动容器控制下，那么这块BFC将脱离控制，自动填满刨去其他浮动元素的剩余空间。
 &emsp;&emsp;62、**如何触发BFC？**
 &emsp;&emsp;①根元素(即html)。
 &emsp;&emsp;②float属性不为none。
-&emsp;&emsp;③position属性为absoulute，fixed。
+&emsp;&emsp;③position属性为absolute，fixed(不为relative和static)。
 &emsp;&emsp;④display为inline-block,table-cell,table-caption,flex,inline-flex。
-&emsp;&emsp;⑤overflow不为visiable时。
+&emsp;&emsp;⑤overflow不为visiable时(auto、scroll或hidden)。
 &emsp;&emsp;63、**消除margin合并的方式：**
 &emsp;&emsp;***对于margin-top合并的情况:***
 &emsp;&emsp;①父元素设置为BFC。
@@ -179,6 +179,7 @@ img[src] { visibility: visible; }
 &emsp;&emsp;70、`tr`，`td`或者`display: table-cell`，`display: table-row`的元素margin都是无效的。
 &emsp;&emsp;71、绝对定位元素非定位方向的margin值无效。
 &emsp;&emsp;72、**定高容器的子元素的margin-bottom或定宽容器的子元素的margin-right无效**，这个就比较经典了，我自己在写需求的时候，就有一个地方需要使用绝对定位设置`margin-right`定位，但是却发现无效了。怎么理解这个问题呢？当我们想通过margin属性改变自身位置时，**必须是和当前元素定位方向一样的margin属性才行，否则设定的margin只能影响后面的兄弟元素或父元素**。这里的定位方向又是啥？对一般元素，默认流是左侧以及上方，那么只能通过`margin-left`和`margin-top`来影响元素定位。但是如果通过`float: right`或者绝对定位设置`right`属性，就会改变定位方向，就可以通过另一侧设置了。
+&emsp;&emsp;**附：当absolute遇到left/top/right/bottom属性时，才变成真正的绝对定位元素。**其实这里涉及到一个相对性问题，当设置了一个方向的属性，那么那个水平或者垂直方向上的相对性将丢失，那这个相对性到底是个啥呢？
 &emsp;&emsp;73、`border-width`不支持百分比值，除了使用固定数值，还支持关键词如`thin`，等同1px；`medium`，默认值等同3px；`thick`，等同4px。
 &emsp;&emsp;74、`border-style`默认值为`none`。**你也可以通过设置`border-width: 0`来重置。**文中描述说如果同时对这两种属性进行设置，渲染性能最高？
 ```css
@@ -224,5 +225,29 @@ div {
     width: 0;
     border: 10px solid;
     border-color: #f30 transparent transparent;
+}
+```
+&emsp;&emsp;79、块级元素负责结构，内联元素负责排版。
+&emsp;&emsp;80、`line-height`行高的定义是两条`baseline`的间距，而`baseline`又对应着英文字母x的下边缘。`vertical-align`的默认值为`baseline`。而CSS中有一个概念`x-height`，它对应字母x的高度，等于等分线`mean-line`到基线`baseline`的距离。、
+&emsp;&emsp;81、我们常用的`vertical-align: middle`并不是等分线`mean-line`处，而是基线往上1/2个`x-height`处。**所以我们有通过`vertical-align: middle`来进行垂直居中时，其实它并不是容器的垂直居中，而是我们字体样式的垂直居中。**
+&emsp;&emsp;82、`ex`单位对应的就是`x-height`的高度，它是一个相对单位，不管字体字号如何改变，永远相对于这个变化。那么这个单位可以怎么利用呢？比如**基于ex单位的天然垂直居中对齐效果实例页面**，见[传送门](https://demo.cssworld.cn/5/1-1.php)。
+&emsp;&emsp;83、`<div>`内容为空的情况高度为0，当添加文字后，高度被撑起，但本质上这个撑起的高度是由行高`line-height`属性绝对的而不是`font-size`。
+&emsp;&emsp;84、前面我们提到了`font-size`，现在我们来看看`font-size`到底作用在啥子地方。首先，`line-height`的数值属性和百分比属性值都是相对于`font-size`计算的。而`vertical-align`又是根据`line-height`计算的，见笔记80。
+&emsp;&emsp;84、关于float，**浮动的本质就是为了实现文字环绕的效果**，文章原话。
+&emsp;&emsp;85、float特性：
+&emsp;&emsp;①**包裹性**，由两部分组成，包裹和自适应性。包裹可以理解为，具有`float`设定的容器的宽高将会以嵌套的内容宽高为表现。自适应则是浮动元素嵌套的元素如果是多个，将会自适应分配剩余空间。
+&emsp;&emsp;②**块状化**格式上下文(BFC)
+&emsp;&emsp;③破坏文档流
+&emsp;&emsp;④无任何margin合并
+&emsp;&emsp;86、笔记85中的第二条中，强调了块状化的说法，那么**什么是块状化？**即一旦float属性不为none，则display计算值将是`block`或者`table`。像以下的写法都是冗余的：
+```css
+span {
+    display: block;  /* 多余 */
+    float: left;
+}
+span {
+    float: left;
+    vertical-align: middle; /* 无效 控制内联的你还指望在块级里搞事情？ */
+    text-align: center; /* 无效 */
 }
 ```
