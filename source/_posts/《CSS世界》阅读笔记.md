@@ -312,13 +312,18 @@ body {
 &emsp;&emsp;99、`word-break`属性有`normal`：默认的换行规则；`break-all`：允许任意非CJK(中日韩)文本单词断行；`keep-all`：不允许CJK单词换行，**只能在半角空格或连字符处换行**。非CJK的文本行为实际上和normal一致。**目前移动端不支持`keep-all`属性**。
 &emsp;&emsp;100、`word-wrap`在CSS3中有了另外的命名`overflow-wrap`，但是考虑到兼容性问题我们还是用以前的写法，属性有`normal`，正常换行规则；`break-world`，一行单词中是在没有其他靠谱的**换行点**再换行，这个换行点比较关键，具体见[传送门](https://demo.cssworld.cn/8/6-5.php)。
 &emsp;&emsp;101、`white-space`用于处理元素内的空白字符(包含了Space、Enter、Tab产生的空白)。属性有`normal`：合并空白字符和换行符；`pre`：空白字符不合并，并且内容只在有换行符的地方换行；`nowrap`：合并空白字符，但不允许文本环绕；`pre-wrap`：`pre`的作用上同时允许文本环绕；`pre-line`：合并空白字符，但只在换行符的地方换行，允许文本环绕。
-&emsp;&emsp;93、关于float，**浮动的本质就是为了实现文字环绕的效果**，文章原话。
-&emsp;&emsp;94、float特性：
+&emsp;&emsp;102、`white-space`设置`nowrap`时，元素宽度表现为"最大可用宽度"，换行符和一些空格合并，文本一行显示。以下是常见的应用场景：
+&emsp;&emsp;①包含块尺寸过小处理。
+&emsp;&emsp;②单行文字溢出点点点效果(配合`text-overflow: ellipsis`)。
+&emsp;&emsp;③水平列表切换效果，[DEMO](https://demo.cssworld.cn/8/6-6.php)。
+&emsp;&emsp;103、`text-decoration`下划线和文本重叠问题如何解决？结合`text-decoration: none`以及设置`border-bottom`和`padding-bottom`。
+&emsp;&emsp;104、关于float，**浮动的本质就是为了实现文字环绕的效果**，文章原话。
+&emsp;&emsp;105、float特性：
 &emsp;&emsp;①**包裹性**，由两部分组成，包裹和自适应性。包裹可以理解为，具有`float`设定的容器的宽高将会以嵌套的内容宽高为表现。自适应则是浮动元素嵌套的元素如果是多个，将会自适应分配剩余空间。
 &emsp;&emsp;②**块状化**格式上下文(BFC)
 &emsp;&emsp;③破坏文档流
 &emsp;&emsp;④无任何margin合并
-&emsp;&emsp;95、笔记85中的第二条中，强调了块状化的说法，那么**什么是块状化？**即一旦float属性不为none，则display计算值将是`block`或者`table`。像以下的写法都是冗余的：
+&emsp;&emsp;106、笔记105中的第二条中，强调了块状化的说法，那么**什么是块状化？**即一旦float属性不为none，则display计算值将是`block`或者`table`。像以下的写法都是冗余的：
 ```css
 span {
     display: block;  /* 多余 */
