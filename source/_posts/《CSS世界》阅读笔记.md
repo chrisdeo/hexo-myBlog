@@ -272,19 +272,30 @@ body {
 }
 ```
 &emsp;&emsp;字体族分类：
-&emsp;&emsp;①serif衬线字体
-&emsp;&emsp;②sans-serif无衬线字体
-&emsp;&emsp;③monospace等宽字体
-&emsp;&emsp;④cursive手写字体
-&emsp;&emsp;⑤fantasy奇幻字体
-&emsp;&emsp;⑥system-ui系统UI字体
-&emsp;&emsp;89、关于float，**浮动的本质就是为了实现文字环绕的效果**，文章原话。
-&emsp;&emsp;90、float特性：
+&emsp;&emsp;①serif 衬线字体，即那些横竖撇捺、张弛有度，有深有浅的字体。
+&emsp;&emsp;②sans-serif 无衬线字体(现在更普适的使用字体)，即那些所有笔画都差不多粗细的字体。
+&emsp;&emsp;以上两者还可以和具体字体名写在一块，但是必须写在最后，因为大多数浏览器下，写在这两种属性后面的字体会被忽略。
+```css
+body {
+    font-family: "Microsoft Yahei", sans-serif;
+}
+```
+&emsp;&emsp;③monospace 等宽字体，这种一般针对英文字体而言，即每个字符在同等`font-size`下宽度相同。这种特性的其中一种应用就是在模拟选择栏中的`solid`、`dashed`这些效果时，使它们长度相当，见[穿送门](https://demo.cssworld.cn/8/2-1.php)。`ch`单位结合等宽字体特性进行手机长度校验这类的宽度控制。`ch`本身是一个相对单位，它对应着阿拉伯数字0的宽度，CSS3才开始支持该单位。
+&emsp;&emsp;④cursive 手写字体
+&emsp;&emsp;⑤fantasy 奇幻字体
+&emsp;&emsp;⑥system-ui 系统UI字体
+&emsp;&emsp;89、`font-weight`同样支持关键词属性和具体的数值，如`normal`，`bold`，`lighter`，`bolder`，数值从100到900(间隔100为一个关键词)，其中400对应`normal`，700对应`bold`。关于`lighter`和`bolder`是对继承的`font-weight`进行解析的，解析规则如下，这里需要注意的是，系统里面需要安装了该字体家族的全部字重字体才能将所有解析情景呈现，否则缺失的字重字体是无法解析的，即没有表现形式。
+&emsp;&emsp;90、`font-style`属性值有`normal`，`italic`，`oblique`，其中要提的一点差异是`italic`与`oblique`，这两者都是指斜体控制，那么有什么区别呢，答案就是如果当前字体有设定专门的斜体字体，那么`italic`会取那个专门的“样式”，如果没有就会适应成`oblique`，`oblique`仅单纯地让文字倾斜。
+&emsp;&emsp;91、缩写的`font`属性：
+&emsp;&emsp;92、关于`@font face`：
+<table><thead><tr><th>继承的值</th><th>bolder</th><th>lighter</th></tr></thead><tbody><tr><td>100</td><td>400</td> <td>100</td></tr><tr><td>200</td><td>400</td><td>100</td></tr><tr><td>300</td><td>400</td><td>100</td></tr><tr><td>400</td><td>700</td><td>100</td></tr><tr><td>500</td><td>700</td><td>100</td></tr><tr><td>600</td><td>900</td><td>400</td></tr><tr><td>700</td><td>900</td><td>400</td></tr><tr><td>800</td><td>900</td><td>700</td></tr><tr><td>900</td><td>900</td><td>700</td></tr></tbody></table>
+&emsp;&emsp;93、关于float，**浮动的本质就是为了实现文字环绕的效果**，文章原话。
+&emsp;&emsp;94、float特性：
 &emsp;&emsp;①**包裹性**，由两部分组成，包裹和自适应性。包裹可以理解为，具有`float`设定的容器的宽高将会以嵌套的内容宽高为表现。自适应则是浮动元素嵌套的元素如果是多个，将会自适应分配剩余空间。
 &emsp;&emsp;②**块状化**格式上下文(BFC)
 &emsp;&emsp;③破坏文档流
 &emsp;&emsp;④无任何margin合并
-&emsp;&emsp;91、笔记85中的第二条中，强调了块状化的说法，那么**什么是块状化？**即一旦float属性不为none，则display计算值将是`block`或者`table`。像以下的写法都是冗余的：
+&emsp;&emsp;95、笔记85中的第二条中，强调了块状化的说法，那么**什么是块状化？**即一旦float属性不为none，则display计算值将是`block`或者`table`。像以下的写法都是冗余的：
 ```css
 span {
     display: block;  /* 多余 */
