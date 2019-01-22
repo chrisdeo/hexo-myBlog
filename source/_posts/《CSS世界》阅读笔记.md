@@ -285,10 +285,33 @@ body {
 &emsp;&emsp;⑤fantasy 奇幻字体
 &emsp;&emsp;⑥system-ui 系统UI字体
 &emsp;&emsp;89、`font-weight`同样支持关键词属性和具体的数值，如`normal`，`bold`，`lighter`，`bolder`，数值从100到900(间隔100为一个关键词)，其中400对应`normal`，700对应`bold`。关于`lighter`和`bolder`是对继承的`font-weight`进行解析的，解析规则如下，这里需要注意的是，系统里面需要安装了该字体家族的全部字重字体才能将所有解析情景呈现，否则缺失的字重字体是无法解析的，即没有表现形式。
-&emsp;&emsp;90、`font-style`属性值有`normal`，`italic`，`oblique`，其中要提的一点差异是`italic`与`oblique`，这两者都是指斜体控制，那么有什么区别呢，答案就是如果当前字体有设定专门的斜体字体，那么`italic`会取那个专门的“样式”，如果没有就会适应成`oblique`，`oblique`仅单纯地让文字倾斜。
-&emsp;&emsp;91、缩写的`font`属性：
-&emsp;&emsp;92、关于`@font face`：
 <table><thead><tr><th>继承的值</th><th>bolder</th><th>lighter</th></tr></thead><tbody><tr><td>100</td><td>400</td> <td>100</td></tr><tr><td>200</td><td>400</td><td>100</td></tr><tr><td>300</td><td>400</td><td>100</td></tr><tr><td>400</td><td>700</td><td>100</td></tr><tr><td>500</td><td>700</td><td>100</td></tr><tr><td>600</td><td>900</td><td>400</td></tr><tr><td>700</td><td>900</td><td>400</td></tr><tr><td>800</td><td>900</td><td>700</td></tr><tr><td>900</td><td>900</td><td>700</td></tr></tbody></table>
+&emsp;&emsp;90、`font-style`属性值有`normal`，`italic`，`oblique`，其中要提的一点差异是`italic`与`oblique`，这两者都是指斜体控制，那么有什么区别呢，答案就是如果当前字体有设定专门的斜体字体，那么`italic`会取那个专门的“样式”，如果没有就会适应成`oblique`，`oblique`仅单纯地让文字倾斜。
+&emsp;&emsp;91、缩写的`font`属性：它的基本语法组成有`[ [ font-style || font-variant || font-weight ] ? font-size [ / line-height ] ? font-family ]`，其中`font-size`和`font-family`是必选的。值得注意的是这种缩写的`font`属性将会破坏部分属性的继承性。原文对这块的例子解释，我觉得有点绕人的意思，概括下来就是当你想用`font`内的`font-weight`属性时，`line-height`将会被覆盖成这个值，并且不同浏览器的这个值是不一样的，存在兼容性问题。另外，由于`font-family`是必选项，当这个属性很长的时候，后面继承的时候就会挂很长的列表。文中提供了如下两种解决方式：
+&emsp;&emsp;①设置一个不存在的字体名占位，然后再设置`font-family: inherit`来重置这个占位字体。
+&emsp;&emsp;②利用`@font face`将我们的字体列表重定义为一个字体。
+&emsp;&emsp;92、关于`@font face`，我们常在字体图标技术中应用它：本质是一个定义字体或字体集的变量，它不仅可以简单定义字体，还包括字体重命名，默认字体样式设置等。需要我们关注的属性包括`font-family`，`src`，`font-style`，`font-weight`和`unicode-range`。这里主要记录一下`src`和`unicode-range`，其余的前文我们有过描述。`src`表示引入的字体资源，如果使用系统安装字体可以使用`locale()`功能符，该功能符IE9及以上版本才支持。而`unicode-range`则是可以替换特定字符或者特定范围内的字符为我们指定的字体(IE8不支持)，如下面这个替换前后双引号的demo。
+
+```css
+@font-face {
+    font-family: quote;
+    src: local('SimSun');
+    unicode-range: U+201c, U+201d;
+}
+.font {
+    font-family: quote, 'Microsoft Yahei';
+}
+```
+
+&emsp;&emsp;93、`text-indent`用于对文本进行缩进控制，我们可以使用`text-indent`负值隐藏文本内容，这种操作可以应用在将网站的标记放在`<h1>`这种标题标签中然后隐藏，利于SEO。**关于`text-indent`为负值的情景，要注意百分比和数值的区别：百分比是根据当前元素的包含块来运算的，而数值则是当前内联盒子，见[实例](https://demo.cssworld.cn/8/6-1.php)。**有一点需要注意，一些设备在`text-indent负值`特别大的时候可能会存在卡顿和性能风险，以及对于一些屏幕阅读软件不会读取越界的内容，将给无障碍阅读用户带来困扰。
+&emsp;&emsp;94、**`text-indent`仅对第一行内联盒子内容有效。**
+&emsp;&emsp;95、**非替换元素意外的`display`计算值为`inline`的内联元素设置`text-indent`无效。**在生效时，注意是否存在嵌套的子元素，由于继承性，如果你还想对其进行别的控制，需要在子元素上覆盖这个值。
+&emsp;&emsp;96、`<input>`的`text-indent`值无效，`<button>`的`text-indent`有效但是存在兼容性问题，IE下百分比根据容器计算，Chrome和FF以及其他Shadow DOM元素浏览器百分比按照自身尺寸计算。
+&emsp;&emsp;97、`letter-spacing`用来控制字符之间的间距，具有继承性。默认值是`normal`而非0，支持负值，当值足够大的时候，会让字符重叠甚至反向排列。
+&emsp;&emsp;98、`word-spacing`与`letter-spacing`特性类似，但前者仅作用在空格字符上。啥意思呢？它生效的条件是你首先得有空格存在。
+&emsp;&emsp;99、`word-break`属性有`normal`：默认的换行规则；`break-all`：允许任意非CJK(中日韩)文本单词断行；`keep-all`：不允许CJK单词换行，**只能在半角空格或连字符处换行**。非CJK的文本行为实际上和normal一致。**目前移动端不支持`keep-all`属性**。
+&emsp;&emsp;100、`word-wrap`在CSS3中有了另外的命名`overflow-wrap`，但是考虑到兼容性问题我们还是用以前的写法，属性有`normal`，正常换行规则；`break-world`，一行单词中是在没有其他靠谱的**换行点**再换行，这个换行点比较关键，具体见[传送门](https://demo.cssworld.cn/8/6-5.php)。
+&emsp;&emsp;101、`white-space`用于处理元素内的空白字符(包含了Space、Enter、Tab产生的空白)。属性有`normal`：合并空白字符和换行符；`pre`：空白字符不合并，并且内容只在有换行符的地方换行；`nowrap`：合并空白字符，但不允许文本环绕；`pre-wrap`：`pre`的作用上同时允许文本环绕；`pre-line`：合并空白字符，但只在换行符的地方换行，允许文本环绕。
 &emsp;&emsp;93、关于float，**浮动的本质就是为了实现文字环绕的效果**，文章原话。
 &emsp;&emsp;94、float特性：
 &emsp;&emsp;①**包裹性**，由两部分组成，包裹和自适应性。包裹可以理解为，具有`float`设定的容器的宽高将会以嵌套的内容宽高为表现。自适应则是浮动元素嵌套的元素如果是多个，将会自适应分配剩余空间。
