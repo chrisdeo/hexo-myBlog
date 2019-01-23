@@ -368,13 +368,22 @@ body {
 }
 ```
 &emsp;&emsp;113、`display: none`和`background-image`的问题： FF中，`display: none`元素的`background-image`是不加载的；但在Chrome和Safari中，若父元素是`display: none`，图片才会不加载，仅是本身元素的背景图`display: none`，图片依旧会去加载。而IE老哥表示，任何情况他都会去加载图片。`<img>`标签则不受`display: none`影响，所有浏览器都会去请求图片资源。
-&emsp;&emsp;107、关于float，**浮动的本质就是为了实现文字环绕的效果**，文章原话。
-&emsp;&emsp;108、float特性：
+&emsp;&emsp;114、`visibility`具有继承性，父元素设置`hidden`后子元素也会被隐藏。另外`visibility: hidden`并不会影响CSS计数器的计算，但是`display: none`时，就完全不会参与计算。
+&emsp;&emsp;115、`visibility`可以配合`transition`实现显隐的过度效果，如`transition: opacity 延迟时间`。CSS3中的`transition`支持CSS属性`visibility`。这种延迟显示的场景有个比较经典的例子：光标移动的过程中，如果不设置延迟效果将会瞬间触发一些hover动作，可能会造成一些不必要的遮挡，见[传送门](https://demo.cssworld.cn/10/2-3.php)。
+&emsp;&emsp;116、关于视觉障碍用户的体验：其实这个问题目前我做的需求都是没有涉及的，作者对`display: none`和`visibility: hidden`两种情景的屏幕阅读进行了对比，即`visibility`的显隐性在视觉障碍用户进行操作时，体验更佳，它能够精准地读取当前操作状态的`title`信息。而`display`显隐无法通知。另外，**普通元素的`title`属性不会被朗读，需要辅助按钮等控件元素，如`role="button"`。**注意:`visibility: hidden`的元素是不会被朗读的。见文中[DEMO](https://demo.cssworld.cn/10/2-4.php)，似乎是个反例，但是其实在从显示到隐藏的这个过程中，区域还没有消失，所以会被朗读出来。
+&emsp;&emsp;117、`outline`
+&emsp;&emsp;118、`outline`的应用：
+&emsp;&emsp;119、`cursor`
+&emsp;&emsp;120、`direction`
+&emsp;&emsp;121、`unicode-bidi`
+&emsp;&emsp;122、`writing-mode`
+&emsp;&emsp;123、关于float，**浮动的本质就是为了实现文字环绕的效果**，文章原话。
+&emsp;&emsp;124、float特性：
 &emsp;&emsp;①**包裹性**，由两部分组成，包裹和自适应性。包裹可以理解为，具有`float`设定的容器的宽高将会以嵌套的内容宽高为表现。自适应则是浮动元素嵌套的元素如果是多个，将会自适应分配剩余空间。
 &emsp;&emsp;②**块状化**格式上下文(BFC)
 &emsp;&emsp;③破坏文档流
 &emsp;&emsp;④无任何margin合并
-&emsp;&emsp;109、笔记105中的第二条中，强调了块状化的说法，那么**什么是块状化？**即一旦float属性不为none，则display计算值将是`block`或者`table`。像以下的写法都是冗余的：
+&emsp;&emsp;125、笔记124中的第二条中，强调了块状化的说法，那么**什么是块状化？**即一旦float属性不为none，则display计算值将是`block`或者`table`。像以下的写法都是冗余的：
 ```css
 span {
     display: block;  /* 多余 */
