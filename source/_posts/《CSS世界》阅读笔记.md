@@ -206,9 +206,7 @@ div {
         <div class="dotted"></div>
     </div>
 ```
-![](chrome.jpg)
-![](ie.jpg)
-&emsp;&emsp;76、`border-style: double`上下两线border实线，值为1px和2px时，与solid表现形式一致。当3px开始才有双线表现，所以有笔记73中的medium默认值。
+<p><img src="./chrome.jpg" style="display: inline-block;margin-left: 120px;"><img src="./ie.jpg" style="display: inline-block;margin-left: 175px;"></p>&emsp;&emsp;76、`border-style: double`上下两线border实线，值为1px和2px时，与solid表现形式一致。当3px开始才有双线表现，所以有笔记73中的medium默认值。
 &emsp;&emsp;77、`border-color`在没有设定时，默认取color色值。
 &emsp;&emsp;78、`border`与`transparent`的巧妙配合：`color: transparent`在IE9以上才支持，而`border-color: transparent`在IE7就支持了。
 &emsp;&emsp;①右下角background定位：现在CSS3操作直接`background-position: right 数值 bottom 数值`即可。 文中提到的下面这种操作...em...我没实践出来。
@@ -317,13 +315,66 @@ body {
 &emsp;&emsp;②单行文字溢出点点点效果(配合`text-overflow: ellipsis`)。
 &emsp;&emsp;③水平列表切换效果，[DEMO](https://demo.cssworld.cn/8/6-6.php)。
 &emsp;&emsp;103、`text-decoration`下划线和文本重叠问题如何解决？结合`text-decoration: none`以及设置`border-bottom`和`padding-bottom`。
-&emsp;&emsp;104、关于float，**浮动的本质就是为了实现文字环绕的效果**，文章原话。
-&emsp;&emsp;105、float特性：
+&emsp;&emsp;104、`text-transform`这个属性就比较有趣了，它是为英文字符定制的，可以将这些字符进行大小写转化。属性也比较简单`uppercase`和`lowercase`。应用价值也极高，比如我们在输入验证码、身份证这些信息时，如果有强校验大写，这种转化无异于帮我们省了一个重大工序。
+&emsp;&emsp;105、`:first-letter`是用来选择首字符进行操作的，不过这里的首字符比较特殊，里面有个比较神奇的设定：就是一些常见的标点符号在`:first-letter`眼中是"附赠品"，什么意思呢？当这些附赠品出现在头部时，它们就像赠品一样默认受我们的选择器影响，然后直到我们真正意义上的首字符(商品)变化为止。其次`:first-letter`生效的前提是`display`值为`block`、`inline-block`、`list-item`、`table-cell`或`table-caption`，其他如`table`、`flex`都无效。另外`:before`伪元素的`content`内容会影响`:first-letter`，即里面的内容将会被优先作用。下面看看它支持的CSS属性：
+&emsp;&emsp;①所有字体相关属性。
+&emsp;&emsp;②所有背景相关属性。
+&emsp;&emsp;③所有margin相关属性。
+&emsp;&emsp;④所有padding相关属性。
+&emsp;&emsp;⑤所有border相关属性。
+&emsp;&emsp;⑥color属性。
+&emsp;&emsp;⑦`text-decoration`等修饰用属性。
+&emsp;&emsp;不能使用`visibility`、`display`这些去控制显隐性。
+&emsp;&emsp;`:first-letter`具有嵌套选择的能力，比如`<p>`下嵌套了一个`<span>`，`<span>`外没内容，能够直接选择到`span`内的首字符。
+&emsp;&emsp;`:first-letter`其实是作为子元素存在的，所以在衡量特指度权重的时候，**相同属性声明，它的级别一定会比父级高**，因为先继承再覆盖。
+&emsp;&emsp;实际应用：如在字段、金额前加符号标记。
+&emsp;&emsp;106、`:first-line`没有笔记105中"附赠品的"操作，两者支持的CSS属性相近。这一类的伪元素选择器视作子元素，跟前文中一样，存在总是高一级样式权重的特征。在标签嵌套的时候有所不一样，它不支持`table`相关属性(`inline-block`/`inline-table`)，[DEMO](https://demo.cssworld.cn/8/7-2.php)。文中对该选择器的应用举了个覆盖父级的例子：按钮具有一个全局的颜色控制，但是按钮的字体不就被遮了么，用`:first-line`指定颜色，就可以规避这个问题。
+&emsp;&emsp;107、**关于颜色的关键字：**如果浏览器能够识别关键字，不会有什么问题，但如果浏览器无法识别的话，在HTML和CSS中定义的这个关键字将会产生不同的解析结果。前者，会有特殊的算法替换这个颜色，后者则会直接使用默认颜色。
+&emsp;&emsp;108、`background-color: transparent`IE6就开始支持，`border-color: transparent`IE7开始支持，但`color: transparent`从IE9才开始支持(高版本的IE8兼容可以透明化，但是用户实际上使用的都是原生IE8)。
+&emsp;&emsp;109、`currentColor`使用当前`color`计算值，但这是个CSS3变量，IE9+才支持。
+&emsp;&emsp;110、`rgba`、`hsl`，CSS3属性，IE9+才支持。`rgba`在低版本中可以使用透明度PNG图片以及`filter`渐变滤镜来兼容。
+&emsp;&emsp;111、`background-color`背景色永远是最低的。
+&emsp;&emsp;112、**一些没见过的隐藏操作：**
+&emsp;&emsp;①不占据空间、辅助设备无法访问、同时不渲染，可以使用`<script>`标签。
+```html
+<script>
+    <img src="1.jpg">
+</script>
+```
+&emsp;&emsp;②不占据空间，辅助设备无法访问，显隐的时候可以有`transition`淡入淡出效果(其实这种应用场景我没有接触过，先记录下)。
+```css
+.hidden {
+    position: absolute;
+    visibility: hidden;
+}
+```
+&emsp;&emsp;③不能点击，不占据空间，键盘可访问，可使用`clip`裁剪。
+```css
+.clip {
+    position: absolute;
+    clip: rect(0, 0, 0, 0);
+}
+.out {
+    position: relative;
+    left: -999em;
+}
+```
+&emsp;&emsp;④可以点击，不占据空间，可以使用透明度。
+```css
+.opacity {
+    position: absolute; /* 是否占据空间控制 */
+    opacity: 0;
+    filter: Alpha(opacity=0); /* 兼容 */
+}
+```
+&emsp;&emsp;113、`display: none`和`background-image`的问题： FF中，`display: none`元素的`background-image`是不加载的；但在Chrome和Safari中，若父元素是`display: none`，图片才会不加载，仅是本身元素的背景图`display: none`，图片依旧会去加载。而IE老哥表示，任何情况他都会去加载图片。`<img>`标签则不受`display: none`影响，所有浏览器都会去请求图片资源。
+&emsp;&emsp;107、关于float，**浮动的本质就是为了实现文字环绕的效果**，文章原话。
+&emsp;&emsp;108、float特性：
 &emsp;&emsp;①**包裹性**，由两部分组成，包裹和自适应性。包裹可以理解为，具有`float`设定的容器的宽高将会以嵌套的内容宽高为表现。自适应则是浮动元素嵌套的元素如果是多个，将会自适应分配剩余空间。
 &emsp;&emsp;②**块状化**格式上下文(BFC)
 &emsp;&emsp;③破坏文档流
 &emsp;&emsp;④无任何margin合并
-&emsp;&emsp;106、笔记105中的第二条中，强调了块状化的说法，那么**什么是块状化？**即一旦float属性不为none，则display计算值将是`block`或者`table`。像以下的写法都是冗余的：
+&emsp;&emsp;109、笔记105中的第二条中，强调了块状化的说法，那么**什么是块状化？**即一旦float属性不为none，则display计算值将是`block`或者`table`。像以下的写法都是冗余的：
 ```css
 span {
     display: block;  /* 多余 */
