@@ -371,9 +371,9 @@ body {
 &emsp;&emsp;114、`visibility`具有继承性，父元素设置`hidden`后子元素也会被隐藏。另外`visibility: hidden`并不会影响CSS计数器的计算，但是`display: none`时，就完全不会参与计算。
 &emsp;&emsp;115、`visibility`可以配合`transition`实现显隐的过度效果，如`transition: opacity 延迟时间`。CSS3中的`transition`支持CSS属性`visibility`。这种延迟显示的场景有个比较经典的例子：光标移动的过程中，如果不设置延迟效果将会瞬间触发一些hover动作，可能会造成一些不必要的遮挡，见[传送门](https://demo.cssworld.cn/10/2-3.php)。
 &emsp;&emsp;116、关于视觉障碍用户的体验：其实这个问题目前我做的需求都是没有涉及的，作者对`display: none`和`visibility: hidden`两种情景的屏幕阅读进行了对比，即`visibility`的显隐性在视觉障碍用户进行操作时，体验更佳，它能够精准地读取当前操作状态的`title`信息。而`display`显隐无法通知。另外，**普通元素的`title`属性不会被朗读，需要辅助按钮等控件元素，如`role="button"`。**注意:`visibility: hidden`的元素是不会被朗读的。见文中[DEMO](https://demo.cssworld.cn/10/2-4.php)，似乎是个反例，但是其实在从显示到隐藏的这个过程中，区域还没有消失，所以会被朗读出来。
-&emsp;&emsp;117、`outline`
-&emsp;&emsp;118、`outline`的应用：
-&emsp;&emsp;119、`cursor`
+&emsp;&emsp;117、`outline`表示元素的轮廓，语法和border属性非常类似；`outline`与`focus`状态以及键盘访问关系密切。Tab键可以依次不断切换focus元素，包括链接、按钮、输入框等表单，甚至**设置了`tabindex`的普通根元素。**`Shift+Tab`可以反向focus。默认状态下，`focus`元素会通过虚框或者外发光的形式进行区分和提示，**当元素被focus后，敲击回车键相当于触发了该元素的click事件。**现代浏览器，点击链接按钮后已经不会触发`outline`效果了，但通过Tab或`element.focus()`才会触发发光效果。
+&emsp;&emsp;118、`outline`的应用：`outline`是真正意义上的不占据任何空间的属性。轮廓宽度设置再厚也不会影响任何其他元素的布局。**并且`outline`轮廓是可穿透的。**书中例子有二，①头像裁剪的矩形镂空效果。②自动填满屏幕剩余空间。
+&emsp;&emsp;119、`cursor`光标属性：`auto`
 &emsp;&emsp;120、`direction`
 &emsp;&emsp;121、`unicode-bidi`
 &emsp;&emsp;122、`writing-mode`
