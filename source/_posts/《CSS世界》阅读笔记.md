@@ -373,10 +373,16 @@ body {
 &emsp;&emsp;116、关于视觉障碍用户的体验：其实这个问题目前我做的需求都是没有涉及的，作者对`display: none`和`visibility: hidden`两种情景的屏幕阅读进行了对比，即`visibility`的显隐性在视觉障碍用户进行操作时，体验更佳，它能够精准地读取当前操作状态的`title`信息。而`display`显隐无法通知。另外，**普通元素的`title`属性不会被朗读，需要辅助按钮等控件元素，如`role="button"`。**注意:`visibility: hidden`的元素是不会被朗读的。见文中[DEMO](https://demo.cssworld.cn/10/2-4.php)，似乎是个反例，但是其实在从显示到隐藏的这个过程中，区域还没有消失，所以会被朗读出来。
 &emsp;&emsp;117、`outline`表示元素的轮廓，语法和border属性非常类似；`outline`与`focus`状态以及键盘访问关系密切。Tab键可以依次不断切换focus元素，包括链接、按钮、输入框等表单，甚至**设置了`tabindex`的普通根元素。**`Shift+Tab`可以反向focus。默认状态下，`focus`元素会通过虚框或者外发光的形式进行区分和提示，**当元素被focus后，敲击回车键相当于触发了该元素的click事件。**现代浏览器，点击链接按钮后已经不会触发`outline`效果了，但通过Tab或`element.focus()`才会触发发光效果。
 &emsp;&emsp;118、`outline`的应用：`outline`是真正意义上的不占据任何空间的属性。轮廓宽度设置再厚也不会影响任何其他元素的布局。**并且`outline`轮廓是可穿透的。**书中例子有二，①头像裁剪的矩形镂空效果。②自动填满屏幕剩余空间。
-&emsp;&emsp;119、`cursor`光标属性：`auto`
-&emsp;&emsp;120、`direction`
-&emsp;&emsp;121、`unicode-bidi`
-&emsp;&emsp;122、`writing-mode`
+&emsp;&emsp;119、`cursor`光标属性：`auto`，cursor的默认值，会跟着内容而变化成不同的光标形态；`default`系统默认光标形态，不会变化，指那种未选定的情形。`none`，隐藏光标，比如观看视频全屏时，静止几秒我们就将鼠标图标隐藏掉，有`mouseover`再重新显示，注意这里`cursor: none`的兼容性是IE9+，即IE8下要做兼容处理，可以通过自定义透明光标(**Chrome弄一张透明PNG**)实现，[传送门](https://demo.cssworld.cn/11/2-1.php)。代码中出现了`:root`选择器，首先这是一个根元素选择器，`html`就是我们的根，其次这是一个CSS3属性，兼容性IE9+。还有一些常用的如`pointer`、`text`就不全部赘述了。
+&emsp;&emsp;120、`direction`主要关注2个属性`ltr`默认值以及`rtl`，分别代表从左到右left to right以及右到左。它负责的东西很关键，就是改变水平流向，比如**交换按钮位置，图片左右互换等等。**
+&emsp;&emsp;121、`unicode-bidi`，这个属性是配合`direction`一起使用的，因为`direction`其实只能改变图片或按钮的呈现顺序，**而对纯字符内容无能为力(尤其是中文字符)**,这个时候就需要兄弟`unicode-bidi`帮忙了。`bidi`的全写英文是`bidirectionality`，它意味着**双向性**(阿拉伯文是从右往左读的)，它帮助规范字符出现双向性时该有的表现,默认值为`normal`，表示正常排列，而`embed`只能作用于内联元素上，并且`embed`属性不会受外部嵌套的元素属性设置影响(相当于自身开了个内嵌区域，自己操作)，[传送门](https://demo.cssworld.cn/12/1-4.php)。`bidi-override`，会强制所有字符按照`direction`设置的方向反向排列。**`embed`和`bidi-override`可以使用特殊字符替代。**
+&emsp;&emsp;122、`writing-mode`就比较牛逼了，它可以将页面默认的水平流改成垂直流。默认值为`horizontal-tb`很好理解，horizontal水平，tb，topbottom，即水平方向从上到下排列。由于不同浏览器和版本支持的属性都有所不同，作者整理出了几个需要关注的属性：
+```css
+.example {
+    writing-mode: lr-tb | tb-rl | tb-lr; /* IE8+ */
+    writing-mode: horizontal-tb | vertical-rl | vertical-lr;
+}
+```
 &emsp;&emsp;123、关于float，**浮动的本质就是为了实现文字环绕的效果**，文章原话。
 &emsp;&emsp;124、float特性：
 &emsp;&emsp;①**包裹性**，由两部分组成，包裹和自适应性。包裹可以理解为，具有`float`设定的容器的宽高将会以嵌套的内容宽高为表现。自适应则是浮动元素嵌套的元素如果是多个，将会自适应分配剩余空间。
