@@ -25,7 +25,7 @@ tags:
 &emsp;&emsp;栗子1：当我们修改a标签成`display: block`的时候，它已经具备了块级特性，即它本身会有流的自然填充性，它会像流一样自动铺满外部容器空间。但是，如果你设置了宽度，不论是百分比还是固定值，它的流动性就丢失了。见书中提供的`width: 100%`流破坏和自然流填充对比[Demo](https://demo.cssworld.cn/3/2-3.php)。
 &emsp;&emsp;栗子2：`*{box-sizing: border-box}`，这种通配符的属性选择器应当尽量避免，因为比如search类型的搜索框，其默认的`box-sizing`就是`border-box`，这种重复赋值就是一种损耗，再比如普通内联元素(**非图片**等替换元素)，`box-sizing`无论是什么值，对渲染表现都没有影响，同样设置这种就是无意义的赋值。
 &emsp;&emsp;13、在本书中，作者将CSS的盒模型分为了"外盒"以及"内盒"，两者对应具有"外部尺寸"以及"内部尺寸"。流的自然填充性就是依赖于外部尺寸的作用。
-&emsp;&emsp;14、**格式化宽度**：该宽度仅出现在`position: absolute`或`position: fixed`情形中，这种情形下，宽度表现为"包裹性"，宽度由内部尺寸决定。但是对于非替换元素，如果left/right，top/bottom这种对向属性同时存在的时候，宽度将会呈现为"格式化宽度"，表现形式就是相对于最近的具有定位特性的祖先元素计算。
+&emsp;&emsp;14、**格式化宽度**：该宽度仅出现在`position: absolute`或`position: fixed`情形中，这种情形下，宽度表现为"包裹性"，**宽度由内部尺寸决定**。但是对于非替换元素，如果left/right，top/bottom这种对向属性同时存在的时候，宽度将会呈现为"格式化宽度"，表现形式就是相对于最近的具有定位特性的祖先元素计算。
 &emsp;&emsp;15、在本书中作者有提到"宽度分离原则"，文中的解释为CSS中的width属性不与影响宽度的padding/border属性共存，即外层容器单独设置width属性，margin、border、padding利用流动性在内部自适应实现。这种设置的目的在于：使宽度严格按照我们预期的设计图宽度生效，用"人话"来说，`width = content-width + padding-width + border-width`。
 &emsp;&emsp;16、当然我们实际使用的时候，提供了`box-sizing: border-box`，这种设置的效果与笔记15中的宽度分离原则一致。默认情况下是
 `box-sizing: content-box`，即`content-width =  width+ padding-width + border-width`。
@@ -430,3 +430,5 @@ li: nth-of-type(3) {
 &emsp;&emsp;132、`clear`只能在一定程度上消除浮动的影响，因为`clear: both`这种本质上是使自身不和float元素在一行显示，所以float一些特性还是会被保留。比如：
 &emsp;&emsp;①`clear: both`元素前也是浮动元素，即使`margin-top`负值设为-9999px也无效。
 &emsp;&emsp;②`clear: both`后面元素依旧可能发生文字环绕现象。
+&emsp;&emsp;133、再看看`overflow`，它才是最适合进行清除浮动的控制属性。为什么呢？因为它不会影响原本的流体特性或宽度表现。而其他的CSS声明基本都会让元素产生"包裹性"。
+&emsp;&emsp;134、`overflow`属性本身是为了对溢出元素的内容进行裁剪而设计的，并且**裁剪边界的判定是以`border box`为基准而非`padding box`。**，[实例](http://demo.cssworld.cn/6/4-1.php)。
