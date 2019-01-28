@@ -432,3 +432,85 @@ li: nth-of-type(3) {
 &emsp;&emsp;②`clear: both`后面元素依旧可能发生文字环绕现象。
 &emsp;&emsp;133、再看看`overflow`，它才是最适合进行清除浮动的控制属性。为什么呢？因为它不会影响原本的流体特性或宽度表现。而其他的CSS声明基本都会让元素产生"包裹性"。
 &emsp;&emsp;134、`overflow`属性本身是为了对溢出元素的内容进行裁剪而设计的，并且**裁剪边界的判定是以`border box`为基准而非`padding box`。**，[实例](http://demo.cssworld.cn/6/4-1.php)。
+&emsp;&emsp;135、`overflow`属性有一个典型的兼容问题，即在Chrome浏览器下如果容器支持滚动，则`padding-box`也会被计入**滚动尺寸**内，表现形式就是拖到容器最下方，若有设定padding，Chrome下将会有留白，而IE和FF不会计算这个padding，即不会有留白问题。
+&emsp;&emsp;136、**IE8以上开始支持`overflow-x`和`overflow-y`属性，它们提供的属性跟`overflow`一致：**
+&emsp;&emsp;①visible: 默认值。
+&emsp;&emsp;②hidden: 剪裁。
+&emsp;&emsp;③scroll: 滚动条区域一直在。
+&emsp;&emsp;④auto: **不足以滚动时没有滚动条，可以滚动时滚动条出现。**
+&emsp;&emsp;**但是，`overflow-x`和`overflow-y`有相互约束：除非`overflow-x`和`overflow-y`属性值都是`visible`，否则`visible`会被当作`auto`解析。**看看下面这个例子：
+```css
+html {
+    overflow-x: hidden;
+    overflow-y: auto; /* 多余，如果不设置，默认是visible，又因为其中一个不是visible，所以这个默认最终会被当auto解析 */
+}
+```
+&emsp;&emsp;137、`textarea`和`html`元素是默认可以产生滚动条的。因为它们默认的`overflow`不是`visible`，IE8开始都是使用`auto`作为默认属性，即默认状态下是没有滚动栏的，只有当内容溢出时才出现。而IE7的表现就是如同设置了`overflow-y: scroll`一样(为什么说如同，见笔记136)，一直保有垂直滚动栏。
+&emsp;&emsp;138、PC端，无论什么浏览器，默认滚动条都是来自`html`，如果想去除默认滚动条可以直接通过如下样式设置剔除：
+```css
+html {
+    overflow: hidden;
+}
+```
+&emsp;&emsp;139、移动端使用笔记138中的方式就不一定能够隐藏默认滚动条了，PC端的滚动高度可以使用`document.documentElement.scrollTop`获取，而移动端需要使用`document.body.scrollTop`获取。那结果已经很明显了，使用body元素选择器即可：
+```css
+body {
+    width: 400px;
+    height: 100px;
+    overflow: auto;
+}
+```
+&emsp;&emsp;这里的宽度虽然是400px，但要**注意到其实滚动条本身会占据空间**，在WIN7系统下的IE7+、Chrome、FF浏览器滚动栏所占据的宽度均为**17px**。关于滚动条占据空间带来最大的影响是水平居中布局可能会产生晃动，因为窗体默认没有滚动条，而**HTML内容是自上而下加载的**，就会发生一开始没有滚动条，然后突然出现滚动条的情况，此时页面的可用宽度发生变化，水平居中重新计算，就会发生页面晃动。比较简单的做法是：
+```css
+html {
+    overflow-y: scroll;
+}
+```
+&emsp;&emsp;但这样虽然横向的`overflow`最终计算就是`auto`了，并且在页面比较高的时候还凑合，但是如果页面就只用一屏，右侧还是始终有滚动栏就不合适了。下面是作者提供的让页面滚动条不发生晃动的技巧：
+```css
+html {
+    overflow-y: scroll; /* for IE8 */
+}
+:root {
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+:root body {
+    position: absolute;
+}
+body {
+    width: 100vh; /* 移动端100% */
+    overflow: hidden;
+}
+```
+&emsp;&emsp;140、自定义浏览器滚动条：IE的自定义效果要比原生的还差；支持`-webkit-`前缀的浏览器可以使用以下属性：
+&emsp;&emsp;`::-webkit-scrollbar`整体部分。
+&emsp;&emsp;`::-webkit-scrollbar-button`两端按钮。
+&emsp;&emsp;`::-webkit-scrollbar-track`外层轨道。
+&emsp;&emsp;`::-webkit-scrollbar-track-piece`内层轨道。
+&emsp;&emsp;`::-webkit-scrollbar-thumb`滚动滑块。
+&emsp;&emsp;`::-webkit-scrollbar-corner`边角。
+&emsp;&emsp;实际开发中使用其中3个就够了：
+```css
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+::-webkit-scrollbar-thumb {
+    background-color: rgba(0,0,0,.3);
+    border-radius: 6px;
+}
+::-webkit-scrollbar-track {
+    background-color: #ddd;
+    border-radius: 6px;
+}
+```
+&emsp;&emsp;141、锚点是如何跳转的就不赘述了，主要记录一下锚点行为的本质：通过改变**容器滚动高度或者宽度亦可以说是修改`scrollTop`和`scrollLeft`**来实现(注意不是浏览器的滚动高度或宽度)。锚点的定位可以发生在普通容器元素上，并且**由内而外**，这个由内而外的意思是当普通元素和窗体同时可滚动的时候，会由内而外触发所有可滚动窗体的锚点定位，假设目前一个是容器盒子的锚点定位，另一个则是页面的视窗锚点定位，即先定位到内部锚点再在整个页面视窗定位，见[DEMO]()。
+&emsp;&emsp;142、**设置了`overflow: hidden`的元素仅是隐藏了滚动条，当内容溢出时，依然可以进行滚动。**当然此时滚动条已经消失，无法通过鼠标滚轮进行操作，但是锚点定位还是可以使得页面滚动。
+&emsp;&emsp;143、结合笔记141和笔记142，可以通过锚点切换来做一些简单的选项卡切换动作。但是在笔记141中的锚点交互中存在由内而外触发锚点定位的页面跳动问题，所以我们可以使用另外一种锚点定位方式：**focus锚点定位，即类似链接或按钮、输入框那种在被focus时发生的重定位现象。**这种方式只要定位的元素在窗体当中，就不会触发窗体的滚动。见[DEMO](http://demo.cssworld.cn/6/4-3.php)。操作的原理就是往列表里加入一个隐藏的`input`框并设置id，然后关联一个`label`，这一步其实跟那篇[<<input与label标签的关联>>](http://www.chendiyou.com/2019/01/21/input%E4%B8%8Elabel%E6%A0%87%E7%AD%BE%E7%9A%84%E5%85%B3%E8%81%94/)文章原理一致，只不过当我们点击关联`label`的同时也focus了我们的输入框，这才真正实现了滚动切换，并且这种focus实现还能通过TAB来控制。
+&emsp;&emsp;144、`position: absolute`和`float`都兼具"块状化"、"包裹性"、"破坏性"等特性。但是当`absolute`和`float`同时存在时，`float`属性是无效的，所以这两者没有理由同时出现。
+&emsp;&emsp;145、`absolute`元素的宽高百分比取决于它的包含块，而这包含块指的是该元素第一个`position`不为`static`的祖先元素。一些基本的计算规则：
+&emsp;&emsp;①`position: statc\relative`以最近的块级元素祖先的`content-box`计算。
+&emsp;&emsp;②`positoin: fixed`以根元素，即浏览器可视窗口大小计算。
+&emsp;&emsp;③`position: absolute`前文提及。
+&emsp;&emsp;对于`absolute`元素，内联元素也能成为它的包含块;包含块不是它的父级元素，而是最近的非`static`祖先或根元素;边界取`padding-box`。
