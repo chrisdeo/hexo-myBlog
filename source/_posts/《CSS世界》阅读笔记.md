@@ -25,7 +25,7 @@ tags:
 &emsp;&emsp;栗子1：当我们修改a标签成`display: block`的时候，它已经具备了块级特性，即它本身会有流的自然填充性，它会像流一样自动铺满外部容器空间。但是，如果你设置了宽度，不论是百分比还是固定值，它的流动性就丢失了。见书中提供的`width: 100%`流破坏和自然流填充对比[Demo](https://demo.cssworld.cn/3/2-3.php)。
 &emsp;&emsp;栗子2：`*{box-sizing: border-box}`，这种通配符的属性选择器应当尽量避免，因为比如search类型的搜索框，其默认的`box-sizing`就是`border-box`，这种重复赋值就是一种损耗，再比如普通内联元素(**非图片**等替换元素)，`box-sizing`无论是什么值，对渲染表现都没有影响，同样设置这种就是无意义的赋值。
 &emsp;&emsp;13、在本书中，作者将CSS的盒模型分为了"外盒"以及"内盒"，两者对应具有"外部尺寸"以及"内部尺寸"。流的自然填充性就是依赖于外部尺寸的作用。
-&emsp;&emsp;14、**格式化宽度**：该宽度仅出现在`position: absolute`或`position: fixed`情形中，这种情形下，宽度表现为"包裹性"，**宽度由内部尺寸决定**。但是对于非替换元素，如果left/right，top/bottom这种对向属性同时存在的时候，宽度将会呈现为"格式化宽度"，表现形式就是相对于最近的具有定位特性的祖先元素计算。
+&emsp;&emsp;14、**格式化宽度**：该宽度仅出现在`position: absolute`或`position: fixed`情形中，这种情形下，宽度表现为"包裹性"，**宽度由内部尺寸决定**。但是对于非替换元素，如果left/right，top/bottom这种对向属性同时存在的时候，宽度将会呈现为"格式化宽度"，表现形式就是**相对于最近的具有定位特性的祖先元素计算，适应于该包含块的`padding box`**。
 &emsp;&emsp;15、在本书中作者有提到"宽度分离原则"，文中的解释为CSS中的width属性不与影响宽度的padding/border属性共存，即外层容器单独设置width属性，margin、border、padding利用流动性在内部自适应实现。这种设置的目的在于：使宽度严格按照我们预期的设计图宽度生效，用"人话"来说，`width = content-width + padding-width + border-width`。
 &emsp;&emsp;16、当然我们实际使用的时候，提供了`box-sizing: border-box`，这种设置的效果与笔记15中的宽度分离原则一致。默认情况下是
 `box-sizing: content-box`，即`content-width =  width+ padding-width + border-width`。
@@ -514,3 +514,10 @@ body {
 &emsp;&emsp;②`positoin: fixed`以根元素，即浏览器可视窗口大小计算。
 &emsp;&emsp;③`position: absolute`前文提及。
 &emsp;&emsp;对于`absolute`元素，内联元素也能成为它的包含块;包含块不是它的父级元素，而是最近的非`static`祖先或根元素;边界取`padding-box`。
+&emsp;&emsp;146、在移动端，列表和模块域往往会有一定的留白来反馈手指按压的感觉，比如加深颜色背景，这种留白往往都是通过`padding`来实现的，那为什么不用`margin`呢？因为margin box永远是透明的。
+&emsp;&emsp;147、在页头放置一个标签，使用透明border设置，可以规避`padding`和`top/right`这种方向属性的耦合(两者的数值都要同时修改)。
+&emsp;&emsp;148、`absolute`是非常独立的CSS属性值，起样式和行为表现不依赖其他任何CSS属性就可以完成。我们很多时候使用绝对定位的时候，都习惯在外层嵌套一层`relative`控制，但其实它自己就能完成这件事，见[DEMO](http://demo.cssworld.cn/6/5-4.php)。作者将那些没有设置方向属性`left/top/right/bottom`的绝对定位称为"无依赖绝对定位"，它可以理解为不占据空间的相对定位。见[DEMO](http://demo.cssworld.cn/6/5-5.php)。后面作者举的输入框校验提示语的DEMO也很亮，就是利用`absolute`的不占据空间的优势而不会破坏最初定好的容器总宽度。[传送门](http://demo.cssworld.cn/6/5-6.php)。虽然以上足以说明"无依赖绝对定位"好处多多，但是最好只在静态交互效果上使用，如导航二级菜单的显示与定位。
+&emsp;&emsp;149、**IE9及其以下版本的浏览器不支持`placeholder`占位符效果。**那怎么模拟呢？可以使用前文提到过的`label`与`input`关联，然后focus转变样式，定位使用前面的"无依赖绝对定位"就很合适，不会占据空间。
+&emsp;&emsp;150、**`absolute`在遇到`left/top/right/bottom`后才真正具有绝对定位的特性**，如果仅有一个方向设定了值，那么没有设定值的方向依然保有相对特性。
+&emsp;&emsp;151、前文中，我们曾提到过当对立方向同时发生定位的时候会产生"格式化宽度"，对于`absolute`元素而言，当它具备"格式化宽度"时，也同时具备了流体特性，如果包含块的`padding box`发生变化，这个块的宽度也会跟着一起变。
+&emsp;&emsp;152、**如果想让绝对定位元素宽高自适应于包含块，没有理由不使用流体特性写法。因为其不仅跟普通元素持有一样的水平流动性，在垂直方向上它也可以保持流动性。**
