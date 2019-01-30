@@ -531,3 +531,56 @@ body {
 &emsp;&emsp;155、关于`relative`的定位问题：
 &emsp;&emsp;①：`letf/top/right/bottom`的百分比值是相对于包含块计算的，垂直方向上的属性百分比值计算跟`height`的百分比值一样，都是相对高度计算。所以当包含块高度是`auto`时，计算值为0，会导致偏移无效。即我们要注意到**父元素没有设定高度或者不是"格式化高度"的情况。**
 &emsp;&emsp;②：**当`relative`的对向属性同时出现的时候，和`absolute`表现非常不一样;当水平方向属性同时出现，只保留`left`；当垂直方向属性同时出现，只保留`top`。因为默认文档流是从左到右，自上而下的。**
+&emsp;&emsp;156、`relative`的最小化影响：
+&emsp;&emsp;①尽量不要使用`relative`，如果想定位某些元素，可以考虑是否能用"无依赖绝对定位"，优势在笔记148中有记录。
+&emsp;&emsp;②如果场景受限，必须使用`relative`时，务必使其最小化，这个最小化可以理解为便于之后的维护以及规避场景复杂后的样式问题。前文中，我们曾提到过`relative`有无侵入性，即它能够保证不影响之后的元素布局。按书中的一个例子,场景是在某个模块右上角定位一个图标：
+```html
+<img src="xx.jpg" style="position: absolute; top: 0; right:0;"> <!-- not good -->
+
+<div style="position: relative"> <!-- better -->
+    <img src="xx.jpg" style="position: absolute; top:0; right:0;">
+</div>
+```
+&emsp;&emsp;其实这种`relative`限制还有一个好处，那就是**层叠级别提升**，`relative`比普通元素的层级要高，那么后面的元素就不会出现可能覆盖前者的情况。
+&emsp;&emsp;157、`position: fixed`正常来讲，不管在啥地方，都是根据根元素即`html`来定位的；但我们可以操作一波把它也按照我们的想法根据包裹的父容器定位，因为`fixed`和`absolute`一样，在没有方向属性的时候具有相对定位特性。
+&emsp;&emsp;158、`position: fixed`的`absolute`模拟：说实话一开始我看这个解释挺懵逼的，什么既不跟随滚动，又被定位元素限制。后面看了下DEMO代码大概能理解其行为了：
+```html
+<html>
+    <body>
+        <div class="page">
+        <div class="fixed">
+    </body>
+</html>
+```
+```css
+html, body {
+    height: 100%;
+    overflow: hidden;
+}
+.page {
+    height: 100%;
+    overflow: auto;
+}
+.fixed {
+    position: absolute;
+}
+```
+&emsp;&emsp;首先同时适配移动端隐藏根的滚动条，然后自行生成一个`page`容器来配置滚动条，最后将绝对定位元素脱离文档流塞进去。由于这个绝对定位元素不在这个滚动容器内，所以它不会滚动，ok符合第一种情况，然后自身绝对定位，可以使用`relative`或者`overflow`等定位剪裁，满足第二个情况。
+&emsp;&emsp;那么这种模拟可以应用在哪种场景呢？比如说我们有一个Modal框点击然后会弹出一个蒙层，如果通过`fixed`定位，蒙层会无法覆盖浏览器右侧的滚动栏，即当有滚动条时，背景内容在蒙层下依旧可以滚动，无法被锁定，但是如果用`absolute`模拟这种问题就被修复了。
+&emsp;&emsp;不过，如果我们的页面结构已经固定了，不太适合全局调整的时候，可以结合JS，移动端，我们阻止`touchmove`事件就能防止滚动，PC端可以通过`overflow: hidden`来隐藏，但这么玩前文中有记录，会导致页面晃动，因为滚动框也占据了可视宽度，我们可以通过**透明border**修复这个问题：
+&emsp;&emsp;蒙层显示：
+```javascript
+var widthBar = 17; //通常情况是17px
+var root = document.documentElement;
+if (typeof window.innerWidth == 'number') {
+    widthBar = window.innerWidth - root.clientWidth;
+}
+root.style.overflow = 'hidden';
+root.style.borderRight = widthBar + 'px solid transparent';
+```
+&emsp;&emsp;蒙层隐藏：
+```javascript
+var root = document.documentElement;
+root.style.overflow = '';
+root.style.borderRight = '';
+```
