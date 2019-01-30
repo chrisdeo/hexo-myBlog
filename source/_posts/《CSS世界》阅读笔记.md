@@ -584,3 +584,9 @@ var root = document.documentElement;
 root.style.overflow = '';
 root.style.borderRight = '';
 ```
+&emsp;&emsp;159、**CSS层叠上下文和层叠水平：**其实关于层叠的问题，我在[<<CSS特指度与布局层叠顺序>>]()一文中曾经结合水印需求讨论过一次，不过那个时候其实只是取了作者博客中的一张图示，在这本书中其实有更为细致的讲解：
+&emsp;&emsp;①谁大谁上：当具有明显的层叠水平标识时，如`z-index`，在同一层叠上下文领域，层叠水平值大的那一个覆盖小的那一个。
+&emsp;&emsp;②后来居上：当元素层叠水平一致、顺序相同时，DOM流处于后面的元素会覆盖前面的元素。
+&emsp;&emsp;③独立性：每个层叠上下文和兄弟元素独立，进行层叠变化或渲染的时候，只需要考虑自身的后代元素；且元素发生层叠的时候，整个元素被认为在其父元素的层叠上下文当中。
+&emsp;&emsp;④根元素`html`本身就具有层叠上下文。
+&emsp;&emsp;⑤对于`position`为`relative/absolute`以及**FF/IE下含有`position: fixed`的元素(注意不包括Chrome)**，**当它们的`z-index`不是`auto`时，会创建层叠上下文。**这里可以参见一个提供的[DEMO](http://demo.cssworld.cn/7/5-1.php)。从DEMO中看到，当元素默认`z-index`是`auto`的时候就是一个**普通定位元素，容器内的元素进行层叠比较将不会受到父级的影响，可以通过①和②的规律来判断。**就算`z-index`的值为0，它也会创建层叠上下文；所以DEMO中，相当于后面的覆盖了之前的，内部由于两块都是独立的层叠上下文，都作用在自己的父容器当中，故不会作用于外面对比，真正进行比较的是两个父容器。另外，作者提及在IE6/IE7下，`z-index: auto`同样会创建层叠上下文；以前的`position: fixed`跟`absolute/relative`一样都需要`z-index`有值才会产生层叠，**但是后面，在`-webkit-`内核的浏览器中`fixed`定位不需要`z-index`就可以产生层叠**，而IE和FF还是和以前保持一致。
