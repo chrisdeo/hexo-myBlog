@@ -367,7 +367,7 @@ body {
     filter: Alpha(opacity=0); /* 兼容 */
 }
 ```
-&emsp;&emsp;113、`display: none`和`background-image`的问题： FF中，`display: none`元素的`background-image`是不加载的；但在Chrome和Safari中，若父元素是`display: none`，图片才会不加载，仅是本身元素的背景图`display: none`，图片依旧会去加载。而IE老哥表示，任何情况他都会去加载图片。`<img>`标签则不受`display: none`影响，所有浏览器都会去请求图片资源。
+&emsp;&emsp;113、`display: none`和`background-image`的问题： FF中，`display: none`元素的`background-image`是不加载的；但在Chrome和Safari中，若父元素是`display: none`，图片才会不加载，仅是本身元素的背景图`display: none`，图片依旧会去加载。而IE老哥表示，任何情况他都会去加载图片。`<img>`标签则不受`display: none`影响，所有浏览器都会去请求图片资源。**有了这种特性，我们就可以利用这种方式去优化我们轮播的加载体验。**
 &emsp;&emsp;114、`visibility`具有继承性，父元素设置`hidden`后子元素也会被隐藏。另外`visibility: hidden`并不会影响CSS计数器的计算，但是`display: none`时，就完全不会参与计算。
 &emsp;&emsp;115、`visibility`可以配合`transition`实现显隐的过度效果，如`transition: opacity 延迟时间`。CSS3中的`transition`支持CSS属性`visibility`。这种延迟显示的场景有个比较经典的例子：光标移动的过程中，如果不设置延迟效果将会瞬间触发一些hover动作，可能会造成一些不必要的遮挡，见[传送门](https://demo.cssworld.cn/10/2-3.php)。
 &emsp;&emsp;116、关于视觉障碍用户的体验：其实这个问题目前我做的需求都是没有涉及的，作者对`display: none`和`visibility: hidden`两种情景的屏幕阅读进行了对比，即`visibility`的显隐性在视觉障碍用户进行操作时，体验更佳，它能够精准地读取当前操作状态的`title`信息。而`display`显隐无法通知。另外，**普通元素的`title`属性不会被朗读，需要辅助按钮等控件元素，如`role="button"`。**注意:`visibility: hidden`的元素是不会被朗读的。见文中[DEMO](https://demo.cssworld.cn/10/2-4.php)，似乎是个反例，但是其实在从显示到隐藏的这个过程中，区域还没有消失，所以会被朗读出来。
@@ -584,7 +584,7 @@ var root = document.documentElement;
 root.style.overflow = '';
 root.style.borderRight = '';
 ```
-&emsp;&emsp;159、**CSS层叠上下文和层叠水平：**其实关于层叠的问题，我在[<<CSS特指度与布局层叠顺序>>]()一文中曾经结合水印需求讨论过一次，不过那个时候其实只是取了作者博客中的一张图示，在这本书中其实有更为细致的讲解：
+&emsp;&emsp;159、**CSS层叠上下文和层叠水平：**其实关于层叠的问题，我在[<<CSS特指度与布局层叠顺序>>](http://www.chendiyou.com/2019/01/09/CSS%E7%89%B9%E6%8C%87%E5%BA%A6%E4%B8%8E%E5%B8%83%E5%B1%80%E5%B1%82%E5%8F%A0%E9%A1%BA%E5%BA%8F/)一文中曾经结合水印需求讨论过一次，不过那个时候其实只是取了作者博客中的一张图示，在这本书中其实有更为细致的讲解：
 &emsp;&emsp;①谁大谁上：当具有明显的层叠水平标识时，如`z-index`，在同一层叠上下文领域，层叠水平值大的那一个覆盖小的那一个。
 &emsp;&emsp;②后来居上：当元素层叠水平一致、顺序相同时，DOM流处于后面的元素会覆盖前面的元素。
 &emsp;&emsp;③独立性：每个层叠上下文和兄弟元素独立，进行层叠变化或渲染的时候，只需要考虑自身的后代元素；且元素发生层叠的时候，整个元素被认为在其父元素的层叠上下文当中。
