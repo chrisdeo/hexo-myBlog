@@ -590,3 +590,34 @@ root.style.borderRight = '';
 &emsp;&emsp;③独立性：每个层叠上下文和兄弟元素独立，进行层叠变化或渲染的时候，只需要考虑自身的后代元素；且元素发生层叠的时候，整个元素被认为在其父元素的层叠上下文当中。
 &emsp;&emsp;④根元素`html`本身就具有层叠上下文。
 &emsp;&emsp;⑤对于`position`为`relative/absolute`以及**FF/IE下含有`position: fixed`的元素(注意不包括Chrome)**，**当它们的`z-index`不是`auto`时，会创建层叠上下文。**这里可以参见一个提供的[DEMO](http://demo.cssworld.cn/7/5-1.php)。从DEMO中看到，当元素默认`z-index`是`auto`的时候就是一个**普通定位元素，容器内的元素进行层叠比较将不会受到父级的影响，可以通过①和②的规律来判断。**就算`z-index`的值为0，它也会创建层叠上下文；所以DEMO中，相当于后面的覆盖了之前的，内部由于两块都是独立的层叠上下文，都作用在自己的父容器当中，故不会作用于外面对比，真正进行比较的是两个父容器。另外，作者提及在IE6/IE7下，`z-index: auto`同样会创建层叠上下文；以前的`position: fixed`跟`absolute/relative`一样都需要`z-index`有值才会产生层叠，**但是后面，在`-webkit-`内核的浏览器中`fixed`定位不需要`z-index`就可以产生层叠**，而IE和FF还是和以前保持一致。
+&emsp;&emsp;160、`clip`从英文看就可以知道是个剪裁属性，并且它仅在`position`为`fixed`或`absolute`时生效，它的基本语法为`clip: rect(top right bottom left)`，`clip: rect(top, right, bottom, left)`这种有逗号的写法其实才是标准的，不过前者兼容性更好，IE6、IE7也支持，并且字符更少。那么它的应用场景在那里呢？
+&emsp;&emsp;①首先是对`fixed`定位进行裁剪，因为`fixed`本身的包含块是`html`，`overflow`虽然也能进行剪裁作用，但是它主要还是应用于普通元素或绝对定位元素，对`fixed`元素除了滚动条区域，其他区域也没办法操作。
+&emsp;&emsp;②隐藏主页上SEO的文本，仅展示图片，比如:
+```html
+<a href="/" class="logo">
+    <h1>CSS世界</h1>
+</a>
+```
+```css
+.logo h1 {
+    position: absolute;
+    clip: rect(0 0 0 0); /* 相当于整块切割了 */
+}
+```
+&emsp;&emsp;这种做法与其他的一些隐藏做法相比优势在于具有更强的普适性，任何元素和场景都可以**无障碍使用(我们前文有记录过一些隐藏元素的方案，但是像`vibility: hidden;`，`display: none`，`text-indent: 足够到屏幕外的负值`这些最终都会导致屏幕阅读设备无法读取)**。同时元素原本的行为特征也被保留，比如原本能够被focus的元素，即使剪裁了依旧能够继续focus，再利用"无依赖绝对定位"的特性可以实现一种替换默认按钮样式的hack操作。文中提供了一个使用关联label替代input的提交按钮做法：
+```css
+.clip {
+    position: absolute;
+    clip: rect(0 0 0 0);
+}
+```
+```html
+<form>
+    <input type="submit" id="someID" class="clip">
+    <label for="someID">提交</label>
+</form>
+```
+&emsp;&emsp;以上，书中有一种"可访问隐藏"的叫法我觉得挺不错的，并且在如何进行隐藏的方案中，`color: transparent`是移动端推荐的做法，但是在PC端IE8浏览器并不支持。
+&emsp;&emsp;作者对`clip`的总结：
+&emsp;&emsp;①`clip`隐藏仅仅是决定哪部分可见，非可见部分无法响应点击事件；
+&emsp;&emsp;②视觉上隐藏，但是元素尺寸依然是原本尺寸；IE/FF浏览器下抹去了不可见区域尺寸对布局的影响比如生成的滚动条，Chrome则保留了影响。
