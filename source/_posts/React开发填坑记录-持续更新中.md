@@ -56,3 +56,40 @@ tags: React
 #### antd中Table的Columns属性中的width在Chrome下是按总和比例适应的，而在IE中是按实际宽度值来显示。
 
 &emsp;&emsp;如描述来说，这样实际场景中就会有很严重的兼容性问题，一般而言，超过Table的宽度，我们会有样式`overflow-x: scroll`，这样就能通过滚动条来浏览过长内容，IE在Table组件没有数据时，也的确是有滚动条的，但一旦有数据填充了Table，滚动条样式就没了，长度超过了Table的宽，就被`overflow: hidden`掉了。目前想到的兼容措施就是，在上面手动根据浏览器agent判断覆盖一层class来实现与Chrome中一样的效果。
+
+#### antd DatePicker 日期选择 点击今天按钮 会出现时间多出一天。
+
+&emsp;&emsp;年前的一个业务模块出现了该问题，由于这块代码之前不是我负责的，所以经过review以及官方issue查找后发现，是由于原本的开发者在进行时间格式化处理的时候，没有使用`moment`的标准格式化操作，而是使用了类似`(moment(fieldsValue.datePicker._d).format('YYYY-MM-DD HH:mm'))`的做法，将内部的值取出来单独做了操作导致的，正确姿势直接用`moment`本身具备的格式化操作即可`(fieldsValue.datePicker.format('YYYY-MM-DD HH:mm'))`。原因在issue中看了部分解释个人觉得合理的如下：
+&emsp;&emsp;1. 点击 今天/现在 那个按钮时，moment对象会经过`getTodayTime`设置了 `utcOffset`。
+&emsp;&emsp;2. `utcOffset`会把 moment 对象的`_isUTC`设为`true`并设置`_offset`。
+```javascript
+// 日期面板 moment 对象
+{
+  _isUTC: false,
+}
+// 现在、今天按钮的 moment 对象
+{
+  _isUTC: true,
+  _offset: 480,
+}
+```
+&emsp;&emsp;可以看到发生多一天的根本原因是有8小时的偏移量，最近issue中维护人员给出了[stackoverflow上的解释](https://stackoverflow.com/questions/31096130/how-to-json-stringify-a-javascript-date-and-preserve-timezone/31104671#31104671)。原帖中的提问是如何将Date对象Json stringify后，仍然能够保有其时区的信息，楼主表示使用`moment.format()`可以实现，但是当对一个具有多属性的对象进行stringify就不便了，然后楼下有个大佬就比较秀了，通过重写Date原型链上的`toJSON`方法来改变JSON.stringify对Date序列化时的表现。也是使用了`moment.format()`，综合有`Date.prototype.toJSON = function(){ return moment(this).format(); }`。按照这个大佬的说法，这样做可以在输出ISO8601时间标准格式的同时涵盖时区偏移量。并且这样做会使所有Date对象都有这种特性，显然在个性化上不太好处理，大佬也给出了建议，直接在实例化对象的`toJSON`方法上改写即可。
+
+#### antd Modal componentDidMount周期内无法获取Modal嵌套内容节点。
+
+&emsp;&emsp;遇到该问题的场景是需要在一个Modal弹窗的内容区域增加水印，水印铺盖方式是先获取内容DOM，然后通过`insertBefore`方法插入节点。这个内容DOM有两种思路，第一种是**获取Modal嵌套的容器**，第二种则是**获取组件`Modal`最终渲染出来的主体部分，即class为`.ant-modal-body`的div。**先说第一种，在`componentDidMount`时返回`null`，复现如下：
+
+![](sandbox.jpg)
+&emsp;&emsp;这个问题，在github的issue里也看到有人提到。那么怎么拿到这个DOM呢？红线框出来的是官方维护人员给出的正确使用姿势。
+&emsp;&emsp;再看第二种，一开始其实我也是没有拿到，根本原因是，我的渲染控制是类似以下这样的：
+```javascript
+    showFlag && (
+        <Modal
+            visible={showFlag}
+        >
+            <MyComponent />
+        </Modal>
+    )
+```
+&emsp;&emsp;其实就是一个很明显的错误，state初始化控制的`showFlag`为`false`，即一开始是没有渲染`Modal`，`componentDidMount`只执行一次，当然拿不到Modal的渲染结果。我们只需要将获取DOM的操作放到`componentDidUpdate`中即可。
+
