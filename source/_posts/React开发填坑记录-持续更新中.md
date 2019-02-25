@@ -1,7 +1,9 @@
 ---
 title: React开发填坑记录(持续更新中)
 date: 2018-12-10 09:11:57
-tags: React
+tags:
+  - Javascript
+  - React
 ---
 
 > &emsp;本文主要记录自己曾在React开发过程中踩过的坑。

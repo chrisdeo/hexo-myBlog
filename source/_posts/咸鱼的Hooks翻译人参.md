@@ -1,7 +1,10 @@
 ---
 title: 咸鱼的Hooks翻译人参
 date: 2018-12-25 11:49:34
-tags: React Hooks
+tags:
+  - Javascript
+  - React
+  - Hooks
 ---
 
 > &emsp;本文并不全是按照React官方文档中关于Hooks提案部分的翻译，最终由本人总结整理顺序思考总结所得。
