@@ -98,3 +98,13 @@ tags:
 #### React中打开新空白页的正确姿势。
 
 &emsp;&emsp;场景是这样的，我需要先弹出一个Modal框，里面是后端返回的文本组成的打印文案，然后我需要预览并按照A4比例打印该内容。核心难点在于实际打印的模板样式和在Modal框中展示的样式是不同的。通过获取DOM的InnerHTML属性，我们可以将打印内容通过原生的`window.print()`方法预览打印，但是如果直接将Modal中的内容选取打印得到的是一块缩小的内容不符合我们的需求打印展示，所以需要打开一个新的空白页面重新在里面填充一个符合比例的模板样式。就在这个时候，我发现按照框架(DVA)内带的路由绑定组件后，新页面还是作为了单页的一块而不是独立的页面。想要将其单独设置其实也很简单，开发中使用的路由是`react-router-dom`v4前的版本，直接在`<Route path="/你的路径" component={你的组件} />`引入我们调整后的页面样式即可。
+
+#### 注意关注包的依赖问题。
+
+&emsp;&emsp;今天在跟往常一样进行移测时，测试突然反馈部署的时候，报错了。当时我挺懵逼的，毕竟之前好几个版本和关联系统都是相同的配置咋会突然就不行了呢？`package.json`中的文件也没有修改过，从测试环境截下来的错误是`Module not found: Error: Can't resolve '@babel/runtime/helpers/esm/extends' in '/app/jenkins/jenkins_home/workspace/XXX/node_modules/esm'`，从本地环境对比下发现`@babel/runtime/helpers`里并没有`esm`，而是存在一个`es6`的目录，初步判定为依赖版本改变导致，但是这边从来没有修改过配置，那只能猜测是否是框架本身的库的上游依赖发生了更新动作或者替换，在后续借助搜索引擎的帮助下，又得到了一个改变`roadhog`版本号的方案，`roadhog`是`dva`框架下的一员，于是跑到github下的dvajs的issue里一搜，果然有相关的问题：
+
+![](ems.jpg)
+
+&emsp;&emsp;按照图中第二种方案，修改如下，问题解决。
+
+![](change.png)
