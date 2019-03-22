@@ -108,3 +108,7 @@ tags:
 &emsp;&emsp;按照图中第二种方案，修改如下，问题解决。
 
 ![](change.png)
+
+#### Antd的Form如何再次校验已经校验过的表单域。
+
+&emsp;&emsp;这个问题主要是发生在表单联动比较多的场景，比如其中一个下拉表单项有是和否两个值，只有在是的时候可以选择填充其余表单，否的时候则禁用其余表单并默认清空。其实到这里都是比较实现的，由于表单项中的数据发生改变会触发render，我们在render中去通过`form.getFieldValue`获取表单变量，并以此为条件判断来渲染改变后面的控制如`disabled={formValue === 'value'}`，`required: { formValue === 'value' || formValue === undefined }`。这就是`JSX`优秀之处，但是`ant-design`本身对`Form`的处理比较神奇，它在对一块表单域进行校验通过后，后续的校验方法即`form.validateFields`, `form.validateFields({ force: true }, (err, values) => {}`。
