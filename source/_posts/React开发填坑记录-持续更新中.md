@@ -111,4 +111,14 @@ tags:
 
 #### Antd的Form如何再次校验已经校验过的表单域。
 
-&emsp;&emsp;这个问题主要是发生在表单联动比较多的场景，比如其中一个下拉表单项有是和否两个值，只有在是的时候可以选择填充其余表单，否的时候则禁用其余表单并默认清空。其实到这里都是比较实现的，由于表单项中的数据发生改变会触发render，我们在render中去通过`form.getFieldValue`获取表单变量，并以此为条件判断来渲染改变后面的控制如`disabled={formValue === 'value'}`，`required: { formValue === 'value' || formValue === undefined }`。这就是`JSX`优秀之处，但是`ant-design`本身对`Form`的处理比较神奇，它在对一块表单域进行校验通过后，后续的校验方法即`form.validateFields`, `form.validateFields({ force: true }, (err, values) => {}`。
+&emsp;&emsp;这个问题主要是发生在表单联动比较多的场景，比如其中一个下拉表单项有是和否两个值，只有在是的时候可以选择填充其余表单，否的时候则禁用其余表单并默认清空。其实到这里都是比较实现的，由于表单项中的数据发生改变会触发render，我们在render中去通过`form.getFieldValue`获取表单变量，并以此为条件判断来渲染改变后面的控制如`disabled={formValue === 'value'}`，`required: { formValue === 'value' || formValue === undefined }`。这就是`JSX`优秀之处，但是`ant-design`本身对`Form`的处理比较神奇，它在对一块表单域进行校验通过后，后续的校验方法即`form.validateFields`中的`err`将会默认为`false`,这样也就意味着我们无法再通过该方法校验我们重新调整过规则的表单域，那怎么搞呢？ 
+
+&emsp;&emsp;`ant-design`文档中对`validateFields`方法有这样一个可选的`force`属性配置，用于对已经校验过的表单域在`validateTrigger`再次被触发时判断是否再次校验，默认值是`false`，即不会再次校验，所以会有我们这种更新后无法触发trigger的问题。**正确姿势就是配置`force`**，见下图：
+
+```javascript
+handleSubmit = (e) => {
+  e.preventDefault();
+  const { form } = this.props;
+  form.validateFields({ force: true }, (err, values) => {});
+}
+```
