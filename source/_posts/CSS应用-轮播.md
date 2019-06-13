@@ -130,7 +130,7 @@ function changeImg(){
 slideImg();
 ```
 
-&emsp;&emsp;如此一个简易的轮播效果便实现了，效果见[传送门](http://www.chendiyou.com/cssDemo/imageRollingSimplify)。
+&emsp;&emsp;如此一个简易的轮播效果便实现了，效果见[传送门](https://chrisdeo.github.io/cssDemo/imageRollingSimplify)。
 
 ## 完整版的轮播实现
 
@@ -261,4 +261,4 @@ slideImg();
     }
 ```
 
-&emsp;&emsp;这样就oxxk了！实际效果走一波[传送门](http://www.chendiyou.com/cssDemo/imageRollingFull)。
+&emsp;&emsp;这样就oxxk了！实际效果走一波[传送门](https://chrisdeo.github.io/cssDemo/imageRollingFull)。
