@@ -14,7 +14,7 @@ tags:
 
 #### 在事件绑定中错误的闭合了函数，导致render时不断渲染触发该函数
 
-&emsp;&emsp;在使用Antd提供的封装Button组件内绑定回调函数时，想要往里面传参，但是由于闭合了函数导致了函数的自执行(姿势不对，Reason见[《React中的合成事件以及传参问题》](http://www.chendiyou.com/2018/12/06/React%E4%B8%AD%E7%9A%84%E5%90%88%E6%88%90%E4%BA%8B%E4%BB%B6%E4%BB%A5%E5%8F%8A%E4%BC%A0%E5%8F%82%E9%97%AE%E9%A2%98/)一文。
+&emsp;&emsp;在使用Antd提供的封装Button组件内绑定回调函数时，想要往里面传参，但是由于闭合了函数导致了函数的自执行(姿势不对，Reason见[《React中的合成事件以及传参问题》](https://chrisdeo.github.io/2018/12/06/React%E4%B8%AD%E7%9A%84%E5%90%88%E6%88%90%E4%BA%8B%E4%BB%B6%E4%BB%A5%E5%8F%8A%E4%BC%A0%E5%8F%82%E9%97%AE%E9%A2%98/)一文。
 
 <escape><!-- more --></escape>
 
