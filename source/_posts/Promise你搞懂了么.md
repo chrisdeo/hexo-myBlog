@@ -51,3 +51,35 @@ initPromise.then(function(value) {
 ![](Promise你搞懂了么/console1.png)
 
 &emsp;&emsp;最终输出的只有**a c**，推理也很简单，答案的推论都在前文的叙述中有所提及，再结合上一篇文章Event Loop的基础：第一个和第二个分别输出`a`，`c`应该是不会有异议的，两者均属于同步，有人的疑问可能是为什么`b`没有输出？从前文我们知道实例化的then是可以接收2个参数的，图中仅传入一个参数那就是对应了`resolved`时的回调，可是在前面实例化Promise时，并没有逻辑指定最后的决策结果，所以Promise还处于一个`pending`状态，所以这个then内的回调自然是无法被触发的，最终输出`a c`。
+
+&emsp;&emsp;有点感觉了？那再来几个试试？
+
+```javascript
+Promise.resolve(1).then(2).then(Promise.resolve(3)).then(console.log);
+```
+
+&emsp;&emsp;开始这个问题的分析前，我们需要先理清一个概念，**Promise.resolve**的作用是什么？它能将现有对象(入参)转化成Promise对象，我们可以分为几种情况讨论：
+
+&emsp;&emsp;①：**参数是一个 Promise 实例**，`Promise.resolve`将会原封不动地返回这个实例。
+&emsp;&emsp;②：**参数是一个 `thenable` 对象**，`thenable`对象指的是具有then方法的对象：
+
+```javascript
+let thenable = {
+  then: function(resolve, reject) {
+    resolve('Hello World!');
+  }
+};
+
+let p1 = Promise.resolve(thenable);
+
+p1.then(function(output) {
+  console.log(output);  // Hello World!
+});
+```
+
+&emsp;&emsp;③：**参数不是对象**，即当我们的入参是个原始值时，它会经过工厂函数转为对应原始值类型对象，然后`Promise.resolve`返回一个状态为`resolved`的新Promise对象，并且该方法的参数会同时传给`then`方法内的回调函数。
+&emsp;&emsp;④：**不带有任何参数**，直接返回一个`resolved`状态的Promise对象。
+
+&emsp;&emsp;OK，我们回到正题，第一个`resolve`使这个Promise实例状态变为`resolved`并且基本类型1转化为对象后向后面then中的回调传递，我们看到第一个`then`中只有一个参数2，根据前文我们知道此处走的是`then`的`resolve`回调，入参是2，**但是没有返回值**。再看到第二个`then`内，传入了一个`resolved`的Promise，但同样没有返回，故最后一个`then`的回调内还是接收的第一个`Promise.resolve`往后传的1，最终输出`1`。
+
+&emsp;&emsp;注：每次`then`方法调用都会返回一个新的Promise实例。
