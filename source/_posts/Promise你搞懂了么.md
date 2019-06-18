@@ -52,7 +52,7 @@ initPromise.then(function(value) {
 
 &emsp;&emsp;最终输出的只有**a c**，推理也很简单，答案的推论都在前文的叙述中有所提及，再结合上一篇文章Event Loop的基础：第一个和第二个分别输出`a`，`c`应该是不会有异议的，两者均属于同步，有人的疑问可能是为什么`b`没有输出？从前文我们知道实例化的then是可以接收2个参数的，图中仅传入一个参数那就是对应了`resolved`时的回调，可是在前面实例化Promise时，并没有逻辑指定最后的决策结果，所以Promise还处于一个`pending`状态，所以这个then内的回调自然是无法被触发的，最终输出`a c`。
 
-&emsp;&emsp;有点感觉了？那再来几个试试？
+&emsp;&emsp;**有点感觉了？那再来几个试试？**
 
 ```javascript
 Promise.resolve(1).then(2).then(Promise.resolve(3)).then(console.log);
@@ -83,3 +83,50 @@ p1.then(function(output) {
 &emsp;&emsp;OK，我们回到正题，第一个`resolve`使这个Promise实例状态变为`resolved`并且基本类型1转化为对象后向后面then中的回调传递，我们看到第一个`then`中只有一个参数2，根据前文我们知道此处走的是`then`的`resolve`回调，入参是2，**但是没有返回值**。再看到第二个`then`内，传入了一个`resolved`的Promise，但同样没有返回，故最后一个`then`的回调内还是接收的第一个`Promise.resolve`往后传的1，最终输出`1`。
 
 &emsp;&emsp;注：每次`then`方法调用都会返回一个新的Promise实例。
+
+&emsp;&emsp;既然讨论了**Promise.resolve**，那肯定也少不了**Promise.reject**，该方法也会返回一个新的Promise实例，并且`reject(reason)`的参数会直接作为后续方法参数传下去，不像`resolve()`会有几种情况判定。举个例子：
+
+```javascript
+const thenable = {
+  then(resolve, reject) {
+    reject('出错了');
+  }
+};
+
+Promise.reject(thenable)
+.catch(e => {
+  console.log(e === thenable)
+})
+// true
+```
+
+&emsp;&emsp;**感觉自己吃透了？看看下面这个大兄弟？**
+
+```javascript
+new Promise((resolve) => {
+  console.log('promise1');
+  resolve();
+}).then(() => {
+  console.log('then11');
+  new Promise((resolve) => {
+    console.log('promise2');
+    resolve();
+  }).then(() => {
+    console.log('then21');
+  }).then(() => {
+    console.log('then22');
+  })
+}).then(() => {
+  console.log('then12');
+})
+```
+
+&emsp;&emsp;先说结果，依次输出`promise1 then11 promise2 then21 then12 then22`，是不是跟想象中的有点不一样？
+
+&emsp;&emsp;记得第一次我看到这个题的时候我也挺懵的，感觉JS白学了。但是现在把一些基础理论搞清楚了，再回来看反而很清晰了...**这里的核心考点就是Promise的`resolved`时会发生什么**：
+
+&emsp;&emsp;①：Promise构造函数内第一行同步方法立即执行，输出`promise1`；
+&emsp;&emsp;②：Promise构造函数内第二行调用`resolve`方法，将Promise实例状态从`pending`置为`resolved`，**状态决定的Promise后面的回调将会被立即执行**，所以我们进入第一个`then`，输出第一个同步任务`then11`；
+&emsp;&emsp;③：紧接着这个回调函数内部又构造了一个新的Promise，跟①中分析的逻辑类似，我们会先输出`promise2`，然后状态`resolved`，立即执行这个构造函数链式的第一个`then`内的回调，输出`then21`；
+&emsp;&emsp;④：**此处就是分歧点了**，最早遇到这个问题的时候前面的输出我是没啥疑问的，但是最后三个输出我就搞不懂了，我当时写的是`then21 then22 then12`，因为当时刚看了点Event Loop的内容，就觉得是按照微任务队列结构输出的；然而这里的真相是什么呢？**这个地方其实跟Event Loop没什么关联，它就是很纯粹的Promise自身特性。**其实在这第二个Promise构造函数内部执行`resolve`方法时，第一个Promise的第一个`then`内的回调返回的Promise实例就`resolved`了，根据我们前面掌握的基础理论，状态确定的Promise的then回调会被立即执行，所以此处会先输出`then12`，最后输出`then22`。
+
