@@ -26,9 +26,21 @@ tags:
 
 #### 修改之前版本的commit message
 
-&emsp;&emsp;这里我们就要使用到`git rebase -i`指令了，该指令可以帮助我们分离头指针，进入交互的控制界面：
+&emsp;&emsp;这里我们就要使用到`git rebase -i`指令了，该指令可以帮助我们分离头指针，进入交互的控制界面。
+
+&emsp;&emsp;进入交互界面后，会列出最新的几条commit信息，越往下内容越新，并且我们可以看见id前都跟着`pick`，意味着它们被正常选中，下面看看`git rebase`支持哪些操作：
+
+&emsp;&emsp;- `pick`：正常选中；
+&emsp;&emsp;- `reword`：选中，并且修改提交信息；
+&emsp;&emsp;- `edit`：rebase时会暂停，允许你修改这个commit；
+&emsp;&emsp;- `squash`：选中，会将当前commit与上一个commit合并；
+&emsp;&emsp;- `fixup`：与squash相同，但不会保存当前commit的提交信息；
+&emsp;&emsp;- `exec`：执行其他shell命令；
 
 
+然后我们使用linux编辑文件的方式在其中选择我们要修改的commit将前面的`pick`修改为`reword`
+
+![](reword.jpg)
 
 ### 版本回退
 
