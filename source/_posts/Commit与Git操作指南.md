@@ -47,6 +47,11 @@ tags:
 
 &emsp;&emsp;现在我们可以看到我们选中的那条`aboutRevert`信息已经被修改成`iChangeThisMsg`了。
 
+### 迁移commit内容
+
+&emsp;&emsp;相信大家都曾遇到过自己开发着开发着...发现分支不对，但是代码都写了，总不能复制粘贴这么low吧，`git`提供了一个操作就是`git cherry-pick`，我们先通过`log`日志找到我们当前操作完成的commitId，再切换回正确的开发分支，执行`git cherry-pick commitId`即可。
+
+
 ### 版本回退
 
 #### commit内容未push到远程仓库
@@ -90,4 +95,3 @@ tags:
 &emsp;&emsp;1. `git reset`会直接删除之前的commit，而`git revert`则是用一次新的commit来回滚之前的commit；
 &emsp;&emsp;2. `git reset`回滚后的分支与历史分支合并后，`reset`恢复的内容依然会在历史分支内，但是`revert`的内容则不会；
 &emsp;&emsp;3. `git reset`操作后，HEAD指针相当于往后移了，而`git revert`则是一直向前移；
-
