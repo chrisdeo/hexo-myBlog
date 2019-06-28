@@ -49,8 +49,10 @@ tags:
 
 ### 迁移commit内容
 
-&emsp;&emsp;相信大家都曾遇到过自己开发着开发着...发现分支不对，但是代码都写了，总不能复制粘贴这么low吧，`git`提供了一个操作就是`git cherry-pick`，我们先通过`log`日志找到我们当前操作完成的commitId，再切换回正确的开发分支，执行`git cherry-pick commitId`即可。
+&emsp;&emsp;相信大家都曾遇到过自己开发着开发着...发现分支不对，但是代码都写了，总不能复制粘贴这么low吧，`git`提供了一个操作就是`git cherry-pick`，我们先通过`log`日志找到我们当前操作完成的commitId，再切换回正确的开发分支，执行`git cherry-pick commitId`即可，之前的内容你可以进行代码回滚，如何操作见后文。
 
+![](cherry.jpg)
+![](pick.jpg)
 
 ### 版本回退
 
@@ -88,10 +90,10 @@ tags:
 
 #### commit内容已push到远程仓库
 
-&emsp;&emsp;以上，我们讨论了commit内容未提交到远端时的回滚流程，当你commit内容已经push到远程仓库，如果是个人项目并且是你独立开发，已经推送到远端的后续内容都不想要了，那可以像前文所述通过`reset`后再`push`，不过这里要注意的是，由于此时你的本地代码已经与远程仓库的代码不一致了，你需要强制推送，执行`git push -f origin 分支`；但是大部分我们构建的项目是多人参与合作的，可能你往远程推送内容后，后续又有别的合作者提交了新的内容，这时候你如果要进行之前的代码回滚或者commit修改要考虑的东西就多了，下面我们介绍一下`git revert`的使用，**`git revert`用于反转提交，简单来说该指令就是用一个新提交来消除一个历史上的提交。**
+&emsp;&emsp;以上，我们讨论了commit内容未提交到远端时的回滚流程，当你commit内容已经push到远程仓库，如果是个人项目并且是你独立开发，已经推送到远端的后续内容都不想要了，那可以像前文所述通过`reset`后再`push`，不过这里要注意的是，由于此时你的本地代码已经与远程仓库的代码不一致了，你需要强制推送，执行`git push -f origin 分支`；但是大部分我们构建的项目是多人参与合作的，可能你往远程推送内容后，后续又有别的合作者提交了新的内容，这时候你如果要进行之前的代码回滚或者commit修改要考虑的东西就多了，下面我们介绍一下`git revert`的使用，**`git revert`用于反转提交，简单来说该指令相当于将你想回退到的节点的commit内容作为一个新的commit添加到你的HEAD头处，即你回退版本的后续commit信息也将保留。**
 
 &emsp;&emsp;那么`git reset`和`git revert`差异点在哪里？
 
-&emsp;&emsp;1. `git reset`会直接删除之前的commit，而`git revert`则是用一次新的commit来回滚之前的commit；
+&emsp;&emsp;1. `git reset`会直接删除从当前到你回退节点中间的commit内容，而`git revert`则是用一次新的commit来回滚之前的commit，中间的commit记录不会被消除；
 &emsp;&emsp;2. `git reset`回滚后的分支与历史分支合并后，`reset`恢复的内容依然会在历史分支内，但是`revert`的内容则不会；
 &emsp;&emsp;3. `git reset`操作后，HEAD指针相当于往后移了，而`git revert`则是一直向前移；
