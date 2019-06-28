@@ -3,7 +3,7 @@ title: What is Markdown?
 date: 2018-11-10 23:21:28
 tags: markdown
 ---
-![](My-first-blog-context/markdown.jpg)
+![](markdown.jpg)
 
 > &emsp;&emsp;说起来也挺尴尬的，coding也有一阵了，一般项目根目录下都会有个README.md文件对项目进行一定的配置说明，但是从来没有关注过.md后缀的文件到底是什么格式的文件，直到开始使用Hexo重新建站（以前的WP服务器到期就没续了）后，发现其生成在_posts下的文章都是以markdown语法编辑的后，感叹了一声，豁。
 

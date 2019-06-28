@@ -38,29 +38,32 @@ tags:
 &emsp;&emsp;- `exec`：执行其他shell命令；
 
 
-然后我们使用linux编辑文件的方式在其中选择我们要修改的commit将前面的`pick`修改为`reword`
+然后我们使用linux编辑文件的方式在其中选择我们要修改的commit将前面的`pick`修改为`reword`，键入`esc`，输入`:wq`保存，会打开另外一个`edit`的界面，我们在里面可以重新编辑之前的message信息：
 
 ![](reword.jpg)
+![](changeMsg.jpg)
+![](newMsg.jpg)
+![](changeRes.jpg)
+
+&emsp;&emsp;现在我们可以看到我们选中的那条`aboutRevert`信息已经被修改成`iChangeThisMsg`了。
 
 ### 版本回退
 
 #### commit内容未push到远程仓库
 
-&emsp;&emsp;前面讲的是修改当前指针指向的message，那如果我想修改之前的commit信息呢？你可能会说我们先版本回退回去，这样指针不就指向那个位置了么？**理论上是这样没错，不过你会丢失在那个指针之后的内容**不过我们还是先操作一波理解一些基本命令的实际执行情况（后面会有正经的解决方案），先执行`git log --pretty=oneline`，`--pretty=oneline`将修改日志内容在一行内给你显示出来，方便我们直观地得到想要的信息：
+&emsp;&emsp;我们通过执行`git log --pretty=oneline`，`--pretty=oneline`能够将每次commit的改动内容浓缩到一行内，方便我们查阅：
 
 ![](log.jpg)
 
-&emsp;&emsp;找到我们想要回去修改commit message的id，如上图中message为`..`处，我们执行`git reset --hard commitId`：
+&emsp;&emsp;假如我们的提交内容还没有push到远程仓库，突然遇到了版本回退的问题，我们需要回到那一个正常的版本节点，如上图中message为`..`处，我们可以执行`git reset --hard commitId`：
 
 ![](resetHard.jpg)
 
 ![](resetResult.jpg)
 
-&emsp;&emsp;可以看到我们回退后，头指针已经指向了我们之前的commitId，但是之后的内容就不存在了，我们的确可以在此处修改当前message，但是一旦我们还原到之前的commitId，这里的修改也被还原到了之前的配置，先看如何还原：我们能通过`git reflog`查找到之前的操作日志，其中会包含我们的每一次操作id。
+&emsp;&emsp;可以看到我们回退后，头指针已经指向了我们之前的commitId，但是之后的内容就不存在了。所以根据你的实际情况，可以考虑在回退之前拉一条分支出来做一个备份。那如果你手速太快没备份就切回去了还能再还原到之前的位置么，答案是肯定的：我们能通过`git reflog`查找到之前的操作日志，其中会包含我们的每一次操作id，再借助这个id `reset`回去即可。
 
 ![](reflog.jpg)
-
-&emsp;&emsp;我们再次reset回之前的头指针处，之前的那次修改就不在了，所以我们不会通过这种方式去修改过去的commit的message，但是以上的回退过程是**我们在未push到远端仓库前的基本回滚流程。**
 
 &emsp;&emsp;`git reset`支持三种不同的配置，`--mixed`，`--soft`以及`--hard`。
 
@@ -68,7 +71,7 @@ tags:
 &emsp;&emsp;2. `--soft`：将已提交内容恢复到暂存区，暂存区原先存储内容不变，本地文件状态同`mixed`也不变；
 &emsp;&emsp;3. `--hard`：清空暂存区，将已提交内容版本恢复到本地，本地文件内容将会发生变化，会被回滚版本内容替代； 
 
-&emsp;&emsp;根据以上几种模式，我们如果遇到**前几个commit message冗余想要在当前的commit中总结成一条**的场景可以直接使用`git reset HEAD~number`，`number`为你想合并的commit数量，当前头指针也会被纳入计算；比如我现在要回退(合并)5个commit信息：
+&emsp;&emsp;前文中我们讨论过如何修改commit的message，现在根据以上几种模式，当我们遇到**前几个commit message冗余想要在当前的commit中总结成一条**的场景可以直接使用`git reset HEAD~number`，`number`为你想合并的commit数量(当前头指针也会被纳入计算)。举个例子，我现在要回退(合并)5个commit信息：
 
 &emsp;&emsp;1. `git reset HEAD~5`；
 &emsp;&emsp;2. `git add .`；
@@ -80,4 +83,11 @@ tags:
 
 #### commit内容已push到远程仓库
 
-&emsp;&emsp;以上，我们讨论了commit内容未提交到远端时的回滚流程，当你commit内容已经push到远程仓库，如果是个人项目并且是你独立开发，已经推送到远端的后续内容都不想要了，那可以`reset`后再`push`，不过这里要注意的是，由于此时你的本地代码已经与远程仓库的代码不一致了，你需要强制推送，执行`git push -f origin 分支`；但是大部分我们构建的项目是多人参与合作的，可能你往远程推送内容后，后续又有别的合作者提交了新的内容，这时候你如果要进行之前的代码回滚或者commit修改就不是那么容易了。
+&emsp;&emsp;以上，我们讨论了commit内容未提交到远端时的回滚流程，当你commit内容已经push到远程仓库，如果是个人项目并且是你独立开发，已经推送到远端的后续内容都不想要了，那可以像前文所述通过`reset`后再`push`，不过这里要注意的是，由于此时你的本地代码已经与远程仓库的代码不一致了，你需要强制推送，执行`git push -f origin 分支`；但是大部分我们构建的项目是多人参与合作的，可能你往远程推送内容后，后续又有别的合作者提交了新的内容，这时候你如果要进行之前的代码回滚或者commit修改要考虑的东西就多了，下面我们介绍一下`git revert`的使用，**`git revert`用于反转提交，简单来说该指令就是用一个新提交来消除一个历史上的提交。**
+
+&emsp;&emsp;那么`git reset`和`git revert`差异点在哪里？
+
+&emsp;&emsp;1. `git reset`会直接删除之前的commit，而`git revert`则是用一次新的commit来回滚之前的commit；
+&emsp;&emsp;2. `git reset`回滚后的分支与历史分支合并后，`reset`恢复的内容依然会在历史分支内，但是`revert`的内容则不会；
+&emsp;&emsp;3. `git reset`操作后，HEAD指针相当于往后移了，而`git revert`则是一直向前移；
+

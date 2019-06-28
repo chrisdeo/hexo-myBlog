@@ -18,7 +18,7 @@ tags:
 
 &emsp;&emsp;我们知道Promise在得到决策结果前有一个`pending`状态，表明当前Promise处于等待状态。我们通过Promise构造函数得到的Promise实例就是处于pending状态，如下图所示：
 
-![](Promise你搞懂了么/pending.jpg)
+![](pending.jpg)
 
 &emsp;&emsp;**注：Promise构造函数中的函数执行是同步的。**
 
@@ -48,7 +48,7 @@ initPromise.then(function(value) {
 
 &emsp;&emsp;到这里你大概觉得已经明白Promise的基本用法了，那可以看看下图中的输出结果是什么：
 
-![](Promise你搞懂了么/console1.png)
+![](console1.png)
 
 &emsp;&emsp;最终输出的只有**a c**，推理也很简单，答案的推论都在前文的叙述中有所提及，再结合上一篇文章Event Loop的基础：第一个和第二个分别输出`a`，`c`应该是不会有异议的，两者均属于同步，有人的疑问可能是为什么`b`没有输出？从前文我们知道实例化的then是可以接收2个参数的，图中仅传入一个参数那就是对应了`resolved`时的回调，可是在前面实例化Promise时，并没有逻辑指定最后的决策结果，所以Promise还处于一个`pending`状态，所以这个then内的回调自然是无法被触发的，最终输出`a c`。
 

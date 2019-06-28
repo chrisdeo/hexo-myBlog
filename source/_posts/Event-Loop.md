@@ -17,7 +17,7 @@ tags:
 
 &emsp;&emsp;关于Chrome浏览器中以v8为js引擎内核的执行周期图在社区中比较常见，如下图所示：
 
-![](Event-Loop/Event_Loop.jpg)
+![](Event_Loop.jpg)
 
 &emsp;&emsp;Web中的Event Loop大致由4部分组成：**MicroTask、MacroTask、Web APIS、Stack** 。在讨论其执行过程时，我们还要区分**异步**和**同步**两种情况。
 
@@ -81,7 +81,7 @@ tags:
 
 #### 核心组成(三层)
 
-![](Event-Loop/nodeInfras.jpg)
+![](nodeInfras.jpg)
 
 &emsp;&emsp;- Node标准库(第一层)： 我们在Node中平常调用的API；
 &emsp;&emsp;- Node绑定层(第二层)： 这一层是JS与底层的C/C++的绑定层，JS通过binding与底层交换数据；
@@ -94,7 +94,7 @@ tags:
 
 #### libuv实现的Event Loop
 
-![](Event-Loop/node_el.jpg)
+![](node_el.jpg)
 
 &emsp;&emsp;- timers(queue)： 执行setTimeout和setInterval的回调；
 &emsp;&emsp;- I/O callbacks： 执行几乎所有异常的close回调、由timers和setImmediate执行的回调；
