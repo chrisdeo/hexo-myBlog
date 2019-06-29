@@ -21,7 +21,6 @@ tags:
 &emsp;&emsp;最常见的应该就是我们commit的message写不是很规范，或者说标注错了，就需要我们重新修改一下，这时可以使用`git commit --amend`，该命令可以修改当前`HEAD`指向commit的message，如下图所示：
 
 ![](amend.jpg)
-
 ![](change.jpg)
 
 #### 修改之前版本的commit message
@@ -120,3 +119,69 @@ tags:
 ![](89.jpg)
 
 &emsp;&emsp;如果要撤销的commitId后有多条内容又要怎么处理呢？前文中的`git rebase`中的`squash`能将多条commit合并成一个，那这个问题就变成跟前面一样的做法了~
+
+&emsp;&emsp;OK！演示完毕，可以把本地和远端的分支删了~本地的直接使用`git branch -D 分支名`，远程使用`git push origin -d 分支名`：
+
+![](local.jpg)
+![](remote.jpg)
+
+## Git Flow规范
+
+via. [宇哲大佬](https://github.com/xingyuzhe/blog/issues/6)
+
+### 版本
+
+&emsp;&emsp;版本号必须符合semver，其的形式为{major}.{minor}.{patch}。
+
+&emsp;&emsp;其中major、minor、patch必须为十进制数字，且随版本发布递增。
+
+&emsp;&emsp;· major版本，第1位数字变化表示一个major版本，此类版本通常是完全的重新设计的版本，可自由做任意更改。
+&emsp;&emsp;· minor版本，第2位数字变化表示一个minor版本，此类版本会有新功能的引入，但应该（SHOULD）保持向后兼容性，如有向后兼容性问题，必须（MUST）在发布的时候说明，并必须（MUST）提供升级指导。
+&emsp;&emsp;· patch版本，第3位数字变化表示一个patch版本，此类版本不得（MUST NOT）引入新的功能或接口，仅能包含重构或功能修复，不得（MUST NOT）引入不向后兼容的变化。
+
+### 分支
+
+&emsp;&emsp;要求:
+
+&emsp;&emsp;· master上永远对应最新的主流版本。
+&emsp;&emsp;· 所有release和master的代码都是绝对可用的。
+&emsp;&emsp;· 分支分为开发分支、发布分支、功能分支、修复分支和master分支。
+&emsp;&emsp;· 实际的分支以版本号为前缀，开发分支的形式为{version}/dev，例如2.1.0/dev, 此类分支用于维护一个版本的开发过程。
+&emsp;&emsp;· 发布分支的形式为{version}/release，例如2.1.0/release, 此类分支用于维护每一个发布版本的状态，不得将功能或修复直接合并至此分支。
+&emsp;&emsp;· 功能分支的形式为{version}/feat/{feature-desc}，例如2.1.0/feat/support-xd, 此类分支用于开发单一的原子性的功能。
+&emsp;&emsp;· 修复分支的形式为{version}/fix/{bug-desc}，例如2.1.0/fix/jira1150, 此类分支用于修复一个已有的BUG。
+&emsp;&emsp;· master分支即master，此分支用于维护当前主流版本的稳定状态，不得将任何功能、修复、开发分支合并至此分支。
+
+### 开发
+
+&emsp;&emsp;· 新建新版本: 每次有新的版本, 就必须(MUST)从master上切出新的开发分支和发布分支。
+&emsp;&emsp;· jira单驱动开发: 开发任何功能前，应该（SHOULD）有一个jira单对应其功能。
+&emsp;&emsp;· 新建功能|修复分支: 每次开发新功能|修复，都应该新建一个单独的分支, 从对应版本的开发分支中拉取功能|修复分支。
+&emsp;&emsp;· 提交commit: 提交commit时应该（SHOULD）提交完整扼要的提交信息, 格式参考 Angular format, 其中包含 形如Fix jira#xxx的信息对应jira单号{version}/dev，例如2.1.0/dev, 此类分支用于维护一个版本的开发过程。
+&emsp;&emsp;· 与开发分支同步: 分支的开发过程中，要经常与开发分支保持同步。
+&emsp;&emsp;· 合并commit: 分支开发完成后，很可能有一堆commit，但是合并到开发分支的时候，往往希望只有一个（或最多两三个）commit，这样不仅清晰，也容易管理。
+&emsp;&emsp;· 开发完成后，推送到远程, 发起pull request，需注意pull request的对应目标为开发分支, @相关人员或者团队。
+&emsp;&emsp;· 相关人员进行Code Review，通过后merge并删除功能|修复分支。
+
+### 提测
+
+&emsp;&emsp;· 从开发分支 向对应的 发布分支 发起Merge Request。
+&emsp;&emsp;· code review 和 merge。
+&emsp;&emsp;· 自动提测(触发Jenkins任务和邮件通知)。
+
+### 发布
+
+&emsp;&emsp;· 生产环境上线成功后, 合并发布分支到master。
+&emsp;&emsp;· 在master上 创建一个tag，tag的命名必须（MUST）为符合semver的当前发布的版本号。
+&emsp;&emsp;· 删除开发分支。
+
+## 开发项目中使用的Git操作流程
+
+&emsp;&emsp;执行`git clone`从gitlab的项目地址拷贝到本地；
+&emsp;&emsp;执行`git remote add upstream`添加上游仓库地址；
+&emsp;&emsp;执行`git remote add origin`添加本地仓库地址；
+&emsp;&emsp;执行`git checkout -t upstream 分支名`关联上游分支，这个操作可以在关联上游分支的同时在本地自动建立一个与上游分支名称相同的本地分支名，之后直接`git pull`即可更新对应分支代码，无需通过写全分支名`git pull upstream 分支名`拉取；
+&emsp;&emsp;本地完成代码编写后，通过`git push -u origin 分支名`在本地仓库更新(如果是第一次则新建该分支)对应分支代码并建立关联，`-u`相当于帮你省了手动执行`git branch --set-upstream-to=origin/远程分支名 本地分支名`进行关联这一步，注意这里我们由于要和上游关联，所以`-u`不用写，正常推到本地仓库即可，更新代码以上游分支为准；
+&emsp;&emsp;进行merge request，注意操作前，先拉一次上游代码以防别人在你request前更新过代码内容造成冲突；
+&emsp;&emsp;注：有时候你可能发现上游仓库已经新建了分支内容，但是你`git branch -a`查看发现并没有，这时候你需要执行一下`git fetch upstream`就可以获取到最新的变更内容了。
+
