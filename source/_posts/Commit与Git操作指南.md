@@ -101,3 +101,22 @@ tags:
 &emsp;&emsp;1. `git reset`会直接删除从当前到你回退节点中间的commit内容，而`git revert`则是用一次新的commit来回滚之前的commit，中间的commit记录不会被消除；
 &emsp;&emsp;2. `git reset`回滚后的分支与历史分支合并后，`reset`恢复的内容依然会在历史分支内，但是`revert`的内容则不会；
 &emsp;&emsp;3. `git reset`操作后，HEAD指针相当于往后移了，而`git revert`则是一直向前移；
+
+##### 如何撤销历史中的某一项commit
+
+&emsp;&emsp;有时候我们会遇到一些比较坑爹的情景，比如某一个版本上线了，突然收到通知说有个功能不要了，需要下掉，要临时发布一个新版本...这种时候如果你之前的commit message都能很精确地描述了你在这次commit中做了什么还是比较好处理的，比如说你这个commit就是开发的那个完整的功能模块内容，那我们只需要针对这个id处理即可，大致流程如下：
+
+&emsp;&emsp;- 找到你不要的那个commitId，选择它之前的id进行`revert`回滚；
+&emsp;&emsp;- 将不要的commitId后需要的内容`cherry-pick`回来；
+
+&emsp;&emsp;本地拉一个测试分支出来演示一下，红圈为我们需要下掉的功能模块，我们`revert`时，可能会遇到冲突，正常解决即可。
+
+![](useless.jpg)
+![](skip.jpg)
+
+&emsp;&emsp;对比远程仓库实际内容，就可以发现`iWriteInAnotherBranch`的修改内容已经被撤销了：
+
+![](47.jpg)
+![](89.jpg)
+
+&emsp;&emsp;如果要撤销的commitId后有多条内容又要怎么处理呢？前文中的`git rebase`中的`squash`能将多条commit合并成一个，那这个问题就变成跟前面一样的做法了~
