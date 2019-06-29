@@ -92,6 +92,10 @@ tags:
 
 &emsp;&emsp;以上，我们讨论了commit内容未提交到远端时的回滚流程，当你commit内容已经push到远程仓库，如果是个人项目并且是你独立开发，已经推送到远端的后续内容都不想要了，那可以像前文所述通过`reset`后再`push`，不过这里要注意的是，由于此时你的本地代码已经与远程仓库的代码不一致了，你需要强制推送，执行`git push -f origin 分支`；但是大部分我们构建的项目是多人参与合作的，可能你往远程推送内容后，后续又有别的合作者提交了新的内容，这时候你如果要进行之前的代码回滚或者commit修改要考虑的东西就多了，下面我们介绍一下`git revert`的使用，**`git revert`用于反转提交，简单来说该指令相当于将你想回退到的节点的commit内容作为一个新的commit添加到你的HEAD头处，即你回退版本的后续commit信息也将保留。**
 
+![](revert.jpg)
+
+&emsp;&emsp;A`就是我们对A的回退生成的新commit，它的内容与A时期是一致的，中间的B被保留在commit记录中。
+
 &emsp;&emsp;那么`git reset`和`git revert`差异点在哪里？
 
 &emsp;&emsp;1. `git reset`会直接删除从当前到你回退节点中间的commit内容，而`git revert`则是用一次新的commit来回滚之前的commit，中间的commit记录不会被消除；
