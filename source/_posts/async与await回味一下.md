@@ -71,4 +71,113 @@ async1()
 console.log(4)
 ```
 
-&emsp;&emsp;最终输出结果是`1 3 4 2`，为啥呢？首先调用栈先调用了`async1()`，然后内部先输出同步的1，然后调用`async2`，`async2`返回一个`promise`同时它内部的输出一样是同步输出，再加外层的4，就是`1 3 4`的顺序，最后`async2`返回的promise`resolved`了，输出`2`。
+&emsp;&emsp;最终输出结果是`1 3 4 2`，为啥呢？首先调用栈先调用了`async1()`，然后内部先输出同步的1，然后调用`async2`，`async2`返回一个`promise`同时它内部的输出一样是同步输出，再加外层的`4`，就是`1 3 4`的顺序，最后`async2`返回的promise`resolved`了，`await`等待结束，输出`2`。
+
+&emsp;&emsp;我自己在这里也改写了一个DEMO，来看看是否真得理解了：
+
+```javascript
+async function async1() {
+    console.log(1)
+    console.log(await async2())
+    console.log(2)
+}
+function async2() {
+	console.log(3)
+  return Promise.resolve(4);
+}
+async1()
+console.log(5)
+```
+
+&emsp;&emsp;还是一步步看，调用栈执行`async1()`，然后同步输出`1`，然后`async1`内的第二个输出结果需要`await`等`async2`的返回值，然后执行`async2`，同步代码，输出`3`，由于`async2`最终返回的是一个`resolved`的Promise对象，还是一个异步的状态进入`micro task `队列维护，我们会继续执行我们的同步任务，即最外层的`5`，之后`Promise.resolve`传入的值返回被`await`等到，输出`4`，这里等待结束，继续输出之后的`2`，所以有最终结果`1 3 5 4 2`。
+
+&emsp;&emsp;如果你看到这里了，可能已经大概摸得差不多了，那我再把上面这个DEMO的`async2`返回变为直接量会如何呢？
+
+```javascript
+async function async1() {
+    console.log(1)
+    console.log(await async2())
+    console.log(2)
+}
+function async2() {
+	console.log(3)
+  return 4;
+}
+async1()
+console.log(5)
+```
+
+&emsp;&emsp;最终输出结果依旧是`1 3 5 4 2`。
+
+&emsp;&emsp;综上，我们可以得到：**`await`其实就是一个异步等待结果的过程，得到结果才会`resolved`从而执行后续代码，同时我们可以把整个`async`函数视作一个Promise的执行流程，在内部`await`前代码块等价于`Promise`构造中的同步代码块，在`await`后的代码可以理解为`then`方法中对应`resolved`的回调处理部分，当`Promise`被`resolved`后就会被回调。还是那句话，同步优先。**
+
+&emsp;&emsp;真的盘清楚了？那你的Promise基础够硬么？如果我将`Promise.resolve`改成`Promise.reject`呢？
+
+```javascript
+async function async1() {
+    console.log(1)
+    console.log(await async2())
+    console.log(2)
+}
+function async2() {
+	console.log(3)
+  return Promise.reject(4);
+}
+async1()
+console.log(5)
+```
+
+&emsp;&emsp;最后输出`1 3 5`...嗯？没了？
+
+![](reject.png)
+
+&emsp;&emsp;可以看到控制台仅输出`1 3 5`，并且有一个未捕获的Promise值，这是因为我们并没有`catch`获取这个值，`await`也无法接收这个值，自然无法输出`4`，而之后的`2`是`resolved`的回调而不是`rejected`的，自然也莫得~
+
+&emsp;&emsp;最后的最后，我们看一看某条的一道看烂的题:
+
+```javascript
+async function async1() {
+    console.log("async1 start");
+    await async2();
+    console.log("async1 end");
+}
+
+async function async2() {
+    console.log("async2");
+}
+
+console.log("script start");
+
+setTimeout(function() {
+    console.log("setTimeout");
+}, 0);
+
+async1();
+
+new Promise(function(resolve) {
+    console.log("promise1");
+    resolve();
+}).then(function() {
+    console.log("promise2");
+});
+
+console.log("script end");
+
+```
+
+&emsp;&emsp;①同步输出`script start`；
+&emsp;&emsp;②`setTimeout`进入宏任务队列；
+&emsp;&emsp;③调用`async1`，同步输出`async1 start`；
+&emsp;&emsp;④`await`等待`async2`被`resolved`的结果返回；
+&emsp;&emsp;⑤执行`async2`，同步输出`async2`；
+&emsp;&emsp;⑥此时`await`还处于异步等待环节，`await`之后的等价于`then`中对应`resolved`的回调，进入微任务队列维护，然后继续处理优先级更高的同步问题；
+&emsp;&emsp;⑦Promise的构造函数中同步输出`promise1`；
+&emsp;&emsp;⑧`resolve`后`then`回调放入微任务队列维护，此时微任务队列中有`async1 end`和`promise2`；
+&emsp;&emsp;⑨继续执行调用栈中的同步任务，输出`script end`；
+&emsp;&emsp;⑩此时同步任务已经全部跑完，我们回头看异步队列中维护的任务，由于微任务优先级高于宏任务，所以我们有`async1 end`，`promise2`，`setTimeout`的输出顺序；
+
+&emsp;&emsp;那最后输出是否是上面说的这样呢？
+
+![](bytedance.jpg)
+
+&emsp;&emsp;成了！
