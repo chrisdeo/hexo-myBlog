@@ -82,8 +82,8 @@ async function async1() {
     console.log(2)
 }
 function async2() {
-	console.log(3)
-  return Promise.resolve(4);
+    console.log(3)
+    return Promise.resolve(4);
 }
 async1()
 console.log(5)
@@ -100,8 +100,8 @@ async function async1() {
     console.log(2)
 }
 function async2() {
-	console.log(3)
-  return 4;
+    console.log(3)
+    return 4;
 }
 async1()
 console.log(5)
@@ -120,8 +120,8 @@ async function async1() {
     console.log(2)
 }
 function async2() {
-	console.log(3)
-  return Promise.reject(4);
+    console.log(3)
+    return Promise.reject(4);
 }
 async1()
 console.log(5)
