@@ -91,7 +91,8 @@ tags:
                 rootFirstKid = rootFirstKid.nextElementSibling;
             }
             while (queue.length) {
-                traverseByBFS(queue.shift());
+                let whoIsOut = queue.pop(); // 取队列的第一个，其实是在数组的尾部
+                traverseByBFS(whoIsOut);
             }
         }
     }
