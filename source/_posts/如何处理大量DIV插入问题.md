@@ -16,7 +16,7 @@ tags:
 
 &emsp;&emsp;最早其实是在一次分享会上听到了相关问题的讲解，近期又在一次面试中和面试官讨论了这个问题：**如何处理大量DIV插入问题？**
 
-&emsp;&emsp;那么本文就以这样一个DEMO来进行讨论：**如何优化一个点击button往`container`容器中插入20W个`div`的场景**。
+&emsp;&emsp;那么本文就以这样一个场景来进行讨论：**如何优化一个点击button往`container`容器中插入20W个`div`的场景**。
 
 #### 方案一：纯appendChild插入
 
@@ -42,7 +42,7 @@ tags:
 
 #### 方案三：创建Fragment插入
 
-&emsp;&emsp;现在可以文艺复兴一波，当年看红宝书的时候其实有这么一个API，我们能够通过`document.createDocumentFragment`的方式，在创建的`Fragment`中进行一些运算量比较大的DOM操作，比如这里的大量DOM插入，在`Fragment`里的插入并不会直接插入到DOM中，待`Fragment`中元素插入完毕，再将这个Fragment插入到父亲节点后，将子元素应用到实际DOM内，`Fragment`则不会出现在实际DOM树内。如此，只存在`Fragment`应用时的一次重排，且也只有最后应用`Fragment`时操作了DOM，与方案二相比，我觉得主要提升体现在无需海量的字符串拼接操作。分析图见下：
+&emsp;&emsp;现在可以文艺复兴一波，当年看红宝书的时候其实有这么一个API->`document.createDocumentFragment`，通过这种方式我们可以创建一个`Fragment`节点，在这个`Fragment`内进行DOM操作并不会直接应用到实际DOM树中，我们往往将一些比较重的活如本文的大量DOM插入放到这里面处理，最后再将这个`Fragment`插入到父亲节点，其子元素会被应用到实际DOM内，而`Fragment`则不会。因此，该方案只存在`Fragment`应用时的一次重排，且也只有最后应用`Fragment`时操作了DOM，与方案二相比，我觉得主要提升体现在无需海量的字符串拼接操作。分析图见下：
 
 ![](fragment.jpg)
 
