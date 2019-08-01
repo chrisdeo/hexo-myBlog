@@ -122,3 +122,18 @@ handleSubmit = (e) => {
   form.validateFields({ force: true }, (err, values) => {});
 }
 ```
+
+#### 注意antd引入组件的作用域问题
+
+&emsp;&emsp;这个问题发生背景在使用antd的`Modal.confirm`，之前的代码通常是把组件提取在头部声明，这样的问题在于会将上下文提升到顶部作用域，`this`的使用就须要小心了：
+
+```javascript
+    confirm({
+        title: '',
+        content: '',
+        okText: '', 
+        onOk: () => {
+            this.setState({})   //  此处的this其实挂在了顶部，就会报错
+        }
+    })
+```
