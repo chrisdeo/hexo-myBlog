@@ -34,3 +34,11 @@ tags:
 ![](gitcz.jpg)
 
 &emsp;&emsp;其实这里的交互有点像`git rebase`，不过实际上只是遵照**参考规范**用于格式化我们的`commit`信息罢了。那这个参考规范指的是什么呢？前文中我们安装的是`Angular`团队进行`commit`提交的参考规范，具体内容可以看[传送门](https://github.com/angular/angular.js/blob/master/DEVELOPERS.md#-git-commit-guidelines)。
+
+&emsp;&emsp;现在我们提交当前这篇博文的第一部分：
+
+![](blogcz.jpg)
+
+&emsp;&emsp;推到远程仓库后：
+
+![](repo.jpg)
