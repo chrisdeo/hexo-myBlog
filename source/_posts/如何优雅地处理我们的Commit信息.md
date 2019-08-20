@@ -1,0 +1,36 @@
+---
+title: 如何优雅地处理我们的Commit信息
+date: 2019-08-20 20:40:33
+tags:
+  - Commit
+  - Husky
+  - Commitizen
+---
+
+> &emsp;之前做过一篇关于如何处理commit信息的博客，但是还缺少一种规范和自动化处理的东西在里面，这篇将会引入commitizen和husky，旨在提升commit信息的可阅读性以及工程化处理的便利性。
+
+<escape><!-- more --></escape>
+
+## 安装
+
+### Commitizen
+
+&emsp;&emsp;`npm install -D commitizen cz-conventional-changelog`开发环境安装依赖，安装后在`package.json`中写入`npm script`和`cz-conventional-changelog`配置。
+
+```javascript
+"scripts": {
+    ...,
+    "commit": "git-cz",
+},
+"config": {
+    "commitizen": {
+        "path": "node_modules/cz-conventional-changelog"
+    }
+}
+```
+
+&emsp;&emsp;配置完毕后，我们键入`npm run commit`应当有下面这个交互界面：
+
+![](gitcz.jpg)
+
+&emsp;&emsp;其实这里的交互有点像`git rebase`，不过实际上只是遵照**参考规范**用于格式化我们的`commit`信息罢了。那这个参考规范指的是什么呢？前文中我们安装的是`Angular`团队进行`commit`提交的参考规范，具体内容可以看[传送门](https://github.com/angular/angular.js/blob/master/DEVELOPERS.md#-git-commit-guidelines)。
