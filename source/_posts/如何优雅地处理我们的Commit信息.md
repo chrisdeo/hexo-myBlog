@@ -11,9 +11,9 @@ tags:
 
 <escape><!-- more --></escape>
 
-## 安装
+## Commitizen
 
-### Commitizen
+### 安装配置
 
 &emsp;&emsp;`npm install -D commitizen cz-conventional-changelog`开发环境安装依赖，安装后在`package.json`中写入`npm script`和`cz-conventional-changelog`配置。
 
@@ -29,6 +29,8 @@ tags:
 }
 ```
 
+### 使用
+
 &emsp;&emsp;配置完毕后，我们键入`npm run commit`应当有下面这个交互界面：
 
 ![](gitcz.jpg)
@@ -42,3 +44,13 @@ tags:
 &emsp;&emsp;推到远程仓库后：
 
 ![](repo.jpg)
+
+&emsp;&emsp;更新部分内容再推送：
+
+![](update.jpg)
+
+### 自定义规范
+
+&emsp;&emsp;前文使用的是`Angular`的提交规范，那假如我们想自己整个怎么办呢？
+
+&emsp;&emsp;我们可以安装`npm i -D cz-customizable`，
