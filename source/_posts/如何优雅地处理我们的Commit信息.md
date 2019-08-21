@@ -84,5 +84,14 @@ module.exports = {
 };
 ```
 
+&emsp;&emsp;再安装`husky`的依赖，`npm i -D husky`，`husky`能够介入`git`的各个`hook`内，进行“中间件”般的操作。
+
+```javascript
+  "husky": {
+    "hooks": {
+      "commit-msg": "commitlint -E HUSKY_GIT_PARAMS"
+    }
+  }
+```
 
 
