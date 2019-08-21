@@ -65,6 +65,24 @@ tags:
 
 &emsp;&emsp;最后在项目根目录创建`.cz-config.js`，内容就是我们自定义的东西。官方提供了一个[模板](https://github.com/leonardoanalista/cz-customizable/blob/master/cz-config-EXAMPLE.js)，对着改就完事了~
 
+![](list.jpg)
+![](cus.jpg)
+
+### 校验
+
+&emsp;&emsp;格式上的方案已经有了，但是很多东西落地还是需要经过推动的，很多开发人员喜欢“自由”的开发模式，历史的经验也告诉我们这样的项目走到最后基本都是悲剧。私以为真正的自由还是需要有约束的，所以我们要求在提交时强校验这个提交信息，于是引入`commitlint`。
+
+&emsp;&emsp;先安装`npm i -D commitlint-config-cz @commitlint/cli`，然后在项目根目录创建`.commitlintrc.js`，写入：
+
+```javascript
+module.exports = {
+  extends: [
+    'cz'
+  ],
+  rules: {
+  }
+};
+```
 
 
 
