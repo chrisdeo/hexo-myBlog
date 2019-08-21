@@ -2,9 +2,12 @@
   "name": "hexo-site",
   "version": "0.0.0",
   "private": true,
+  "scripts": {
+    "commit": "git-cz"
+  },
   "husky": {
     "hooks": {
-      "commit-msg": "commitlint -e $GIT_PARAMS"
+      "commit-msg": "commitlint -E HUSKY_GIT_PARAMS"
     }
   },
   "hexo": {
