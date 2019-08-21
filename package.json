@@ -34,11 +34,12 @@
   },
   "config": {
     "commitizen": {
-      "path": "node_modules/cz-customizable"
+      "path": "node_modules/cz-conventional-changelog"
     }
   },
   "devDependencies": {
     "@commitlint/cli": "^8.1.0",
+    "@commitlint/config-conventional": "^8.1.0",
     "commitizen": "^4.0.3",
     "commitlint-config-cz": "^0.12.1",
     "cz-conventional-changelog": "^3.0.2",
