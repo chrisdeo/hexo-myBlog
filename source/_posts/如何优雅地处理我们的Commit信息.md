@@ -53,4 +53,18 @@ tags:
 
 &emsp;&emsp;前文使用的是`Angular`的提交规范，那假如我们想自己整个怎么办呢？
 
-&emsp;&emsp;我们可以安装`npm i -D cz-customizable`，
+&emsp;&emsp;我们可以安装cz自定义配置的依赖`npm i -D cz-customizable`，然后修改`package.json`内的`config`项。把前文指向`cz-conventional-changelog`的`path`替换为`cz-customizable`。
+
+```javascript
+"config": {
+    "commitizen": {
+        "path": "node_modules/cz-customizable"
+    }
+}
+```
+
+&emsp;&emsp;最后在项目根目录创建`.cz-config.js`，内容就是我们自定义的东西。官方提供了一个[模板](https://github.com/leonardoanalista/cz-customizable/blob/master/cz-config-EXAMPLE.js)，对着改就完事了~
+
+
+
+
