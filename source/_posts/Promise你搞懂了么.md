@@ -82,6 +82,8 @@ p1.then(function(output) {
 
 &emsp;&emsp;OK，我们回到正题，第一个`resolve`使这个Promise实例状态变为`resolved`并且基本类型1转化为对象后向后面then中的回调传递，我们看到第一个`then`中只有一个参数2，根据前文我们知道此处走的是`then`的`resolve`回调，入参是2，**但是没有返回值**。再看到第二个`then`内，传入了一个`resolved`的Promise，但同样没有返回，故最后一个`then`的回调内还是接收的第一个`Promise.resolve`往后传的1，最终输出`1`。
 
+&emsp;&emsp;**换言之，`Promise.resolve`的入参会作为后续then的传参；只有在`then`的回调函数内有返回值时，才会覆盖之前的传参往后续的链式`then`中传递**
+
 &emsp;&emsp;注：每次`then`方法调用都会返回一个新的Promise实例。
 
 &emsp;&emsp;既然讨论了**Promise.resolve**，那肯定也少不了**Promise.reject**，该方法也会返回一个新的Promise实例，并且`reject(reason)`的参数会直接作为后续方法参数传下去，不像`resolve()`会有几种情况判定。举个例子：
@@ -130,3 +132,13 @@ new Promise((resolve) => {
 &emsp;&emsp;③：紧接着这个回调函数内部又构造了一个新的Promise，跟①中分析的逻辑类似，我们会先输出`promise2`，然后状态`resolved`，立即执行这个构造函数链式的第一个`then`内的回调，输出`then21`；
 &emsp;&emsp;④：**此处就是分歧点了**，最早遇到这个问题的时候前面的输出我是没啥疑问的，但是最后三个输出我就搞不懂了，我当时写的是`then21 then22 then12`，因为当时刚看了点Event Loop的内容，就觉得是按照微任务队列结构输出的；然而这里的真相是什么呢？**这个地方其实跟Event Loop没什么关联，它就是很纯粹的Promise自身特性。**其实在这第二个Promise构造函数内部执行`resolve`方法时，第一个Promise的第一个`then`内的回调返回的Promise实例就`resolved`了，根据我们前面掌握的基础理论，状态确定的Promise的then回调会被立即执行，所以此处会先输出`then12`，最后输出`then22`。
 
+&emsp;&emsp;后记：隔了一段时间回顾了下这篇文章，发现其实上面的④说的也是模棱两可的，有点混。现在的我给出新的解释：**这里就是走的单纯的Promise回调触发逻辑**，之前因为Promise的底子不够扎实，一直没有定位出来。我们先看下面的对比：
+
+```javascript
+let promise = new Promise(resolve => resolve()).then(() => {})
+// Promise {<resolved>}
+let promise = new Promise(resolve => resolve()).then(() => new Promise((res, rej) => {}))
+// Promise {<pending>}
+```
+
+&emsp;&emsp;发现问题了么？没错，其实就是`then`的回调函数问题，我们知道`then`方法可以接收2个回调函数作为参数，分别用来指定`resolved`状态以及`rejected`状态的回调。前文题目中其实都是默认走了第一个`resolved`的回调，而如果这个回调内没有返回一个`new Promise`，那`then`方法最终返回的那个Promise实例都是`resolved`状态的，都会即刻触发后面链式`then`的回调。因此，前文第二个`new Promise`我觉得可以这么理解：它首先要管理内部的“小弟”，其次它还需要反馈自身状态来继续外层的链式`then`动作。那么，走到内部`resolve`时，由于回调即可执行，会先输出`then21`，此时其实这个Promise的状态已定，对于它自身所在的这个`then`方法回调来说，已经可以确认状态了，于是状态转`resolved`触发最后的`then`回调，输出`then12`，最后才走`then22`...这或许也是异步的魅力？（误）
