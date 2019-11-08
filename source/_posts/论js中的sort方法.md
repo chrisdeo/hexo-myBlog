@@ -108,62 +108,145 @@ function swap(arr, from, to) {
 }
 ```
 
-&emsp;&emsp;有了交换的辅助函数，剩下的就是原地快排的函数主体，基础思路就是，选择基准点，然后换位...怎么换，或者说如何进行分区？
+&emsp;&emsp;有了交换的辅助函数，剩下的就是原地快排的函数主体，大致思路如下：
 
-&emsp;&emsp;1. 选取基准点。
-&emsp;&emsp;2. 这里我们取第一个元素，同时设置一个分区指针`startIdx`。它的意义就是最后交换完成时，标记分界线，我们会将基准值与其位置的值交换。最终得到基准值左侧小，右侧大的结果（完成分区）。 
-
-```javascript
-function doPartial(arr) {
-    let startIdx = 0;
-    let pivot = arr[startIdx];
-    for (let i = 1; i < arr.length; i++) {
-        if (arr[i] < pivot) {
-            startIdx++;
-            swap(arr, i, startIdx);
-        } else {
-            continue;
-        }
-    }
-    swap(arr, 0, startIdx);
-}
-```
-
-&emsp;&emsp;注意这里我们其实都是对一个数组进行修改，要改写一下前面的分区操作：
-
-```javascript
-function doPartial(arr, from, to) {
-    let startIdx = from;
-    let pivot = arr[startIdx];
-    for (let i = 1; i < to; i++) {
-        if (arr[i] < pivot) {
-            startIdx++;
-            swap(arr, i, startIdx);
-        } else {
-            continue;
-        }
-    }
-    swap(arr, from, startIdx);
-}
-```
-
-&emsp;&emsp;然后是原地快排的组合：
+1. 设置基准点。
+2. 从基准点后开始循环。
+3. 从前向后扫描，找到比基准点大的值（移动左指针）；
+4. 从后向前扫描，找到比基准点小的值（移动右指针）；
+5. 交换两值，最终目的是指针重合后（找到中位线），中位线左侧值都小于基准值，右侧都大于基准值；
+6. 当左指针大于右指针时跳出循环，此时一次轮回完成，交换基准位置到中位线处；
+7. 在中位线左右侧分别递归上述过程。
 
 ```javascript
 function quickSortInPlace(arr, from, to) {
-    if (!Array.isArray(arr) || arr.length < 2) return;
-    let startIdx = from;
-    let pivot = arr[startIdx];
-    for (let i = from + 1; i < to; i++) {
-        if (arr[i] < pivot) {
-            startIdx++;
-            swap(arr, i, startIdx);
-        } else {
-            continue;
+    // 递归出口，起止扫描同位置时，意味着仅剩一个元素，无需递归
+    if (from < to) {
+        let pivot = arr[from]; // 基准点
+        let lStart = from + 1; // 开始比较的值 从基准点后一个开始
+        let rEnd = to - 1; // 遍历
+        while(true) {
+            while (lStart <= rEnd && arr[lStart] < pivot) {
+                lStart++;
+            }
+            while (lStart <= rEnd && arr[rEnd] >= pivot) {
+                rEnd--;
+            }
+            if (lStart > rEnd) {
+                break;
+            } else {
+                swap(arr, lStart, rEnd);
+            }
         }
+        swap(arr, from, rEnd); // 交换基准到中间位置，此时rEnd已在中间指针
+        quickSortInPlace(arr, from, rEnd);
+        quickSortInPlace(arr, rEnd + 1, to);
     }
-    swap(arr, from, startIdx);
-    quickSortInPlace(arr, from, startIdx - 1);
-    quickSortInPlace(arr, startIdx + 1, to);
 }
 ```
+
+##### 分区问题
+
+&emsp;&emsp;其实上面已经实现了基本的原地快排算法，但依旧有问题。主要表现在分区时是否能使当前区域等分。若都能均分，就是我们讨论的最快情形**O(nlogn)**。但如果每次分区，都有一个区域是空的，那相当于退化了，又变成逐个循环的**O(n^2)**情形。所以如果一个数组已经排好序了，按照最开始的做法，每次分块都会造成空间浪费，且性能也会退化。
+
+&emsp;&emsp;那有什么方案是专门用来进行基准值选择的呢？
+
+##### 三数取中
+
+&emsp;&emsp;字面意思理解，就是取三个数字中大小在中间的数字，MDZZ。
+
+&emsp;&emsp;结合快排分区来说，我们可以很容易得到头、尾元素肯定是要参与其内的，剩下一个元素我们可以结合一下源码：
+
+```javascript
+var GetThirdIndex = function(a, from, to) {
+    var t_array = new InternalArray();
+    // Use both 'from' and 'to' to determine the pivot candidates.
+    var increment = 200 + ((to - from) & 15);
+    var j = 0;
+    from += 1;
+    to -= 1;
+    for (var i = from; i < to; i += increment) {
+        t_array[j] = [i, a[i]];
+        j++;
+    }
+    t_array.sort(function(a, b) {
+        return comparefn(a[1], b[1]);
+    });
+    var third_index = t_array[t_array.length >> 1][0];
+    return third_index;
+}
+
+var QuickSort = function QuickSort(a, from, to) {
+    var third_index = 0;
+    // 略
+    if (to - from <= 10) {
+        InsertionSort(a, from, to);
+        return;
+    }
+    if (to - from > 1000) {
+        third_index = GetThirdIndex(a, from, to);
+    } else {
+        third_index = from + ((to - from) >> 1);
+    }
+    // 略
+}
+```
+
+&emsp;&emsp;大概理解下：
+
+1. 初始化第三个参与比较的基准数字为0；
+2. 当区间在11~1000内时，取`from + (to - from) / 2`;
+3. 区间大于1000时，会取一个增量区间（200~215），在`from`到`to`间以该增量区间进行取值构成新数组，新数组排序后返回中间值的索引充当第三个比较基准。
+4. 最后`from`、`to`、`third_index`三数比较（过程见源码），中间值作基准值。
+
+```javascript
+// v0 <= v1 <= v2
+a[from] = v0;
+a[to - 1] = v2;
+var pivot = v1;
+```
+
+&emsp;&emsp;在以上基础上，得到源码中的分区实现：
+
+```javascript
+partition: for (var i = low_end + 1; i < high_start; i++) {
+    var element = a[i];
+    var order = comparefn(element, pivot);
+    if (order < 0) {
+        a[i] = a[low_end];
+        a[low_end] = element;
+        low_end++;
+    } else if (order > 0) {
+        do {
+            high_start--;
+            if (high_start == i) break partition;
+            var top_elem = a[high_start];
+            order = comparefn(top_elem, pivot);
+        } while (order > 0);
+        a[i] = a[high_start];
+        a[high_start] = element;
+        if (order < 0) {
+            element = a[i];
+            a[i] = a[low_end];
+            a[low_end] = element;
+            low_end++;
+        }
+    }
+}
+if (to - high_start < low_end - from) {
+    QuickSort(a, high_start, to);
+    to = low_end;
+} else {
+    QuickSort(a, from, low_end);
+    from = high_start;
+}
+```
+
+&emsp;&emsp;分析可以得到大致思路如下：
+
+1. 先找到基准索引，然后交换基准与下界；
+2. 从第二个位置开始扫描，遇到比基准值小的，与基准值交换位置，同时`low_end`自增，标志基准的位置；
+3. 遇到比基准值大的情况，开始从上边界往前扫描，直到找到比基准值小的元素（与外部扫描指针重合，则跳出循环）；
+4. 此时，将我们找到的比基准值小的元素 与 前面比基准值大的交换位置；
+5. 然后将基准值与这个较小值换位，`low_end`自增；
+6. 第一round分区结束，**取范围小的区域进行递归（减少递归的深度）**，另外一个区域则继续通过`while`循环处理。
