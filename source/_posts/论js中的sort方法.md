@@ -206,6 +206,8 @@ a[to - 1] = v2;
 var pivot = v1;
 ```
 
+##### 源码分区
+
 &emsp;&emsp;在以上基础上，得到源码中的分区实现：
 
 ```javascript
