@@ -46,6 +46,8 @@ tags:
 
 &emsp;&emsp;现在我们可以看到我们选中的那条`aboutRevert`信息已经被修改成`iChangeThisMsg`了。
 
+&emsp;&emsp;PS：在`commit`条数过多时，可以通过`git rebase -i HEAD~number`来指定要操作的`commit`数量（从当前`commit`往回计算，包括当前`commit`）。
+
 ### 迁移commit内容
 
 &emsp;&emsp;相信大家都曾遇到过自己开发着开发着...发现分支不对，但是代码都写了，总不能复制粘贴这么low吧，`git`提供了一个操作就是`git cherry-pick`，我们先通过`log`日志找到我们当前操作完成的commitId，再切换回正确的开发分支，执行`git cherry-pick commitId`即可，之前的内容你可以进行代码回滚，如何操作见后文。
@@ -185,3 +187,12 @@ via. [宇哲大佬](https://github.com/xingyuzhe/blog/issues/6)
 &emsp;&emsp;进行merge request，注意操作前，先拉一次上游代码以防别人在你request前更新过代码内容造成冲突；
 &emsp;&emsp;注：有时候你可能发现上游仓库已经新建了分支内容，但是你`git branch -a`查看发现并没有，这时候你需要执行一下`git fetch upstream`就可以获取到最新的变更内容了。
 
+&emsp;&emsp;**一些Q&A：**
+
+1. `git push origin master`中的`origin`其实是我们人为约定的，它仅是一个区分不同仓库的标志，比如前文中我们提到的上游（upstream）和本地（origin）仓库，都是出于可读性上的考虑和规范。所以其实这个`origin`完全可以设置成别的名字，并不影响功能。另外，你自己定义的这个名字须与你添加仓库指向`git add xx git@yy.git`对应。
+
+2. 有时候会发生远程仓库的服务器挂了，运维临时将`gitlab`部署到别的服务器，那就需要手动调整指向`git remote set-url 定制名 git@xxx.git`。通过`git remote -v`可以确认当前项目仓库对应关系。
+
+3. 在多人协作项目中，由于仓库本身更新（比如新增加分支）并不会进行主动更新推送；所以会造成前文中所讲的`git branch -a`无法找到，也无法进行`checkout -t`关联，所以有`git fetch 定制名`进行指定仓库的代码信息拉取（并不是合并，只是同步最新内容）。我们通常使用的`git pull`等价于`git fetch + git merge`。
+
+4. `git merge`在多人协作中会造成多条合并分支线，建议使用`git rebase origin feature/x.y.z`合并代码，这种合并方式会将你分支上的`commit`内容重新应用在合并的主分支上，最终得到的就是一条干净的改动推进线。
