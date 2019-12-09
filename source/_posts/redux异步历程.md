@@ -144,7 +144,7 @@ export const fetchTableList = createAction('FETCH_TABLE_LIST', WebAPI.fetchTable
 
 ### redux-saga
 
-&emsp;&emsp;`saga`使用的是`generator`语法，根据js异步API的发展，我们也知道其语法本身改变是为了减少`Promise`带来的层层回调嵌套；而之后业内又有了`co`库，以及ES6中的`async/await`，为我们提供了更多样的选择。
+&emsp;&emsp;`saga`，我认为它带来的核心价值有二：其一是使用`generator`语法处理了异步回调地狱问题；其二是使用混合式（命令+声明）编程的思想组织异步数据流，在具体异步逻辑中采用命令式编程，然后声明式调用派发`action`，触发`saga`的`effects`。
 
 &emsp;&emsp;通过阅读`saga`库的`README.md`，我们先理清其提供的几个API的基本功能：
 
