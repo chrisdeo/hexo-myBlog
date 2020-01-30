@@ -27,3 +27,13 @@ tags:
 - 路由配置
 - 数据Mock方案
 - CI
+
+## 踩坑日志
+
+### 路由配置
+
+&emsp;&emsp;路由可以说是SPA的灵魂了，至于对应React的选型自然是`react-router`，本次搭建采用了最新的v5.x版本。下面是一些配置过程中的key point记录。
+
+#### BrowserRouter vs HashRouter
+
+&emsp;&emsp;
