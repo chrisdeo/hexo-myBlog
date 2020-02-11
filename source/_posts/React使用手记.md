@@ -164,6 +164,298 @@ export default class Demo extends PureComponent {
 
 &emsp;&emsp;你或许会对获取请求数据后在`componentDidmount`中`setState`触发额外的`render`抱有疑惑，我当年也有，不过上图也给出了解答：额外的`render`会在浏览器更新屏幕前进行触发，所以即便有多次`render`用户也不会感知。
 
-### 数据管理
+## 数据管理
 
 &emsp;&emsp;React的数据管理也是一个逐步演化、进步的过程：单向数据流方面，从`flux`到`redux`，再到社区一系列的成熟中间件`thunk`、`saga`、`observable`等辅助；观察者方面，有类似Vuex的`mobx`。
+
+### Redux
+
+&emsp;&emsp;讲Redux前，简要提提Flux（主要是本人没用过）。Flux作为数据单项流的先驱，本身其实仅是一种设计模式（跟React一样，由FB提出），即便是源码中也主要是对`dispatcher`的实现。它的出现是为了解决MVC混乱的数据流向问题。对于Flux来说，视图层唯一的数据源都是来自`store`,通过`dispatch action`去进行数据拉取和更新（event监听）。
+
+![](flux.jpg)
+
+&emsp;&emsp;既然是一种思想，那就意味着不同的开发者会有各种实现和理解，无法统一在某些场景的处理方案。外加其中存在很多冗余代码，于是乎有了后续在社区中脱颖而出的Redux。
+
+&emsp;&emsp;Redux同样是类Flux设计，它简化了Flux的一些冗余代码，其本质上就是一个叫`redux`的npm包，内置了不少API让我们建立`store`，构建`action`、组织`reducer`等。当然完整的数据管理，光有`redux`库是不够的，如果把`store`理解为数据库，那我们需要一个东西将数据与我们的React应用连接起来，那就是`react-redux`，它是由Redux官方提供的React绑定，可以放心食用。
+
+&emsp;&emsp;先聊聊几个`redux`的核心API：`createStore`、`combineReducers`、`applyMiddleware`、`compose`、`bindActionCreators`。
+
+#### createStore
+
+&emsp;&emsp;通过阅读源码，可以知道`createStore`接收三个参数，最终返回一个对象，其中有如`dispatch`、`getState`等关键状态改变获取的方法：
+
+```javascript
+function createStore(reducer, preloadedState, enhancer) {
+// 略
+// return {
+// 	dispatch, // 去改变state的方法 派发 action
+// 	subscribe, // 监听state变化 然后触发回调
+// 	getState, // 访问这个createStore的内部变量currentState 也就是全局那个大state
+// 	replaceReducer, // 传入新的reducer 来替换之前内部的reducer 可能场景是在代码拆分、redux的热加载？
+// 	[$$observable]: observable // symbol属性 返回一个observable方法
+// }
+}
+```
+
+&emsp;&emsp;接着我们一个个分析参数，第一个参数`reducer`，在项目中我们通常会使用`combineReducers`组合成一个大的reducer传入，那`combineReducers`做了什么呢？
+
+#### combineReducers
+
+```javascript
+function combineReducers(reducers) {
+	//  略去一些
+	return function combination(state = {}, action) {
+		const nextState = {}
+		for (let i = 0; i < finalReducerKeys.length; i++) {
+		const key = finalReducerKeys[i]
+		const reducer = finalReducers[key]
+		const previousStateForKey = state[key]
+		const nextStateForKey = reducer(previousStateForKey, action)
+		if (typeof nextStateForKey === 'undefined') {
+			const errorMessage = getUndefinedStateErrorMessage(key, action)
+			throw new Error(errorMessage)
+		}
+		nextState[key] = nextStateForKey
+		hasChanged = hasChanged || nextStateForKey !== previousStateForKey
+		}
+		return hasChanged ? nextState : state
+	}
+}
+/** 
+	* 比如传入的子reducer函数是 	 
+	* function childA(state = 0, action) {
+	*   switch (action.type) {
+	*		case 'INCREMENT':
+	*			return state + 1
+	*		case 'DECREMENT':
+	*			return state - 1
+	*		default:
+	*			return state
+	*	 }
+	* }
+	* 那初始情况下的store.getState() // { childA: 0 }
+*/
+```
+
+&emsp;&emsp;`combineReducers`接收一个对象，里面的`key`是每一个小`reducer`文件或函数导出的namespace，value则是与其对应的reducer函数实体。然后它会将这些不同的reducer函数合并到一个reducer函数中。它会调用每一个合并的子reducer，并且会将他们的结果放入一个state中，最后返回一个闭包使我们可以像操作之前的子reducer一样操作这个大reducer。对于我们开发者来说只要注意导入的子`reducer`文件名，即`key`值便可。
+
+&emsp;&emsp;`preloadedState`就是我们传入的初始`state`，当然源码中的注释里描述还可以向服务端渲染中的应用注入该值or恢复历史用户的session记录，不过没实践过，就不延展了...
+
+&emsp;&emsp;最后的入参`enhancer`比较关键，字面理解就是用来增强功能的，先看看部分源码：
+
+```javascript
+if (typeof preloadedState === 'function' && typeof enhancer === 'undefined') {
+    enhancer = preloadedState
+    preloadedState = undefined
+}
+
+if (typeof enhancer !== 'undefined') {
+    if (typeof enhancer !== 'function') {
+        throw new Error('Expected the enhancer to be a function.')
+    }
+    return enhancer(createStore)(reducer, preloadedState)
+}
+```
+
+&emsp;&emsp;在这里我们发现其实`createStore`可以只接收2个参数，当第二个参数为函数时，会自动初始化`state`为`undefined`，所以看到一些`createStore`只传了2个参数不要觉得奇怪。
+
+#### applyMiddleware
+
+&emsp;&emsp;关于`applyMiddleware`，是一个组合中间件的API，社区中也有诸多辅助的库如`redux-logger`（派发`action`时，在控制台打印）、`redux-thunk`（支持`function`类型的`action`）、`redux-saga`（采用`Generator`语法的异步流程处理方式，避免了callback hell）等等。
+
+&emsp;&emsp;下面我们先看看源码，再看看通常是如何使用的。
+
+```javascript
+function compose(...funcs) {
+  if (funcs.length === 0) {
+    return arg => arg
+  }
+
+  if (funcs.length === 1) {
+    return funcs[0]
+  }
+
+  return funcs.reduce((a, b) => (...args) => a(b(...args)))
+}
+```
+
+```javascript
+function applyMiddleware(...middlewares) {
+  return (createStore) => (reducer, preloadedState, enhancer) => {
+    const store = createStore(reducer, preloadedState, enhancer)
+    let dispatch = store.dispatch
+    let chain = []
+
+    const middlewareAPI = {
+      getState: store.getState,
+      dispatch: (action) => dispatch(action)
+    }
+    chain = middlewares.map(middleware => middleware(middlewareAPI))
+    dispatch = compose(...chain)(store.dispatch)
+
+    return {
+      ...store,
+      dispatch
+    }
+  }
+}
+```
+
+&emsp;&emsp;从源码中分析，可以比较直观地理解API意图，如`redux`中的工具方法`compose`是为了优雅地进行高阶函数嵌套；假设我们有高阶函数A、B、C ，要实现A(B(C(...args)))的效果，如果没有`compose`，就需要不断地将返回结果赋值，调用。而使用`compose`，只需要一次赋值`let HOC = compose(A, B, C)`;，然后调用`HOC(...args)`即可。
+
+&emsp;&emsp;而`applyMiddleware`的作用也很自然得到是用来增强我们生成的`store`对象的`dispatch`方法，比如增加识别`function`类型的`action`、支持Generator写法，输出日志等等。
+
+&emsp;&emsp;前文源码中的`middlewareAPI`内的属性初见者可能会比较迷，不过我们结合一下`redux-thunk`的源码就很好理解了：
+
+```javascript
+function createThunkMiddleware(extraArgument) {
+  return ({ dispatch, getState }) => next => action => {
+    if (typeof action === 'function') {
+      return action(dispatch, getState, extraArgument);
+    }
+    return next(action);
+  };
+}
+
+const thunk = createThunkMiddleware();
+thunk.withExtraArgument = createThunkMiddleware;
+
+export default thunk;
+```
+
+&emsp;&emsp;通过代码，我们可以得知一般middleWare的内部构造都遵从一个`({ getState, dispatch }) => next => action => {...}`的范式，并且导出的时候已经被调用了一次，即返回了一个需要接收`getState`和`dispatch`的函数。这样就很好解释`middlewareAPI`的数据结构了。综合`applyMiddleware`调用易得其中的`next`方法即我们传入的`store.dispatch`，通过这般应用中间件的方式支持`function`类型的`action`派发。
+
+#### bindActionCreators
+
+&emsp;&emsp;一个生成标准`action`的工具方法，后文使用用例中会讲。
+
+### React Redux
+
+&emsp;&emsp;前文中讲解了`redux`的比较关键的一些API，同时也提到了`redux`仅是构建`store`的一步，我们还需要有一座桥梁将其与我们的应用连接，那就是`react-redux`。官方提供了清晰的使用DEMO，核心是一个提供全局`store`的`Provider`组件及一个关联`store`的`state`内容到组件的`connect`API：
+
+#### Provider
+
+```javascript
+import React from 'react'
+import ReactDOM from 'react-dom'
+
+import { Provider } from 'react-redux'
+import store from './store'
+
+import App from './App'
+
+const rootElement = document.getElementById('root')
+ReactDOM.render(
+  <Provider store={store}>
+    <App />
+  </Provider>,
+  rootElement
+)
+```
+
+#### connect()
+
+```javascript
+import { connect } from 'react-redux'
+import { increment, decrement, reset } from './actionCreators'
+
+// const Counter = ...
+
+const mapStateToProps = (state /*, ownProps*/) => {
+  return {
+    counter: state.counter
+  }
+}
+
+const mapDispatchToProps = { increment, decrement, reset }
+
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(Counter)
+```
+
+&emsp;&emsp;可以看到`Provider`组件是嵌套在我们应用最外层的，这样的结构要让全局组件去获取其中的属性很自然能够联想到React的`context`，从源码中分析，新版本`react-redux`已经使用HOOKS语法重构了，不过原理是一样的，`ReactReduxContext`即通过`React.createContext(null)`导出的初始`context`，`useMemo`用以构造两个监听`store`变化触发更新的值，`contextValue`及`previousState`。`useEffect`在两值发生变动时进行事件订阅，如果状态改动会通知嵌套的关联子组件。最终是返回一个`Context.Provider`组件，将`contextValue`交给嵌套的消费者使用。
+
+```javascript
+import React, { useMemo, useEffect } from 'react'
+import PropTypes from 'prop-types'
+import { ReactReduxContext } from './Context'
+import Subscription from '../utils/Subscription'
+
+function Provider({ store, context, children }) {
+  const contextValue = useMemo(() => {
+    const subscription = new Subscription(store)
+    subscription.onStateChange = subscription.notifyNestedSubs
+    return {
+      store,
+      subscription
+    }
+  }, [store])
+
+  const previousState = useMemo(() => store.getState(), [store])
+
+  useEffect(() => {
+    const { subscription } = contextValue
+    subscription.trySubscribe()
+
+    if (previousState !== store.getState()) {
+      subscription.notifyNestedSubs()
+    }
+    return () => {
+      subscription.tryUnsubscribe()
+      subscription.onStateChange = null
+    }
+  }, [contextValue, previousState])
+
+  const Context = context || ReactReduxContext
+
+  return <Context.Provider value={contextValue}>{children}</Context.Provider>
+}
+
+if (process.env.NODE_ENV !== 'production') {
+  Provider.propTypes = {
+    store: PropTypes.shape({
+      subscribe: PropTypes.func.isRequired,
+      dispatch: PropTypes.func.isRequired,
+      getState: PropTypes.func.isRequired
+    }),
+    context: PropTypes.object,
+    children: PropTypes.any
+  }
+}
+
+export default Provider
+```
+
+&emsp;&emsp;`connect()`涉及到的源码内容比较复杂，这里就不作过深讨论，简单来说就是通过HOC的方式将`store`的`state`内容映射到我们的组件`props`属性上。
+
+&emsp;&emsp;前文内容了解得差不多了后，下面说说我个人使用过的一些方式。
+
+#### 目录组织
+
+&emsp;&emsp;一般我个人习惯下图这样组织`redux`的内容结构，因为`store`是C位，`action`和`reducer`都是辅助：
+
+![](menu.jpg)
+
+#### 拆分合并reducer
+
+&emsp;&emsp;根据业务场景进行对应文件`reducer`的合并（`combineReducers`），`connect`中通过`state.xxx.xxx`绑定。
+
+#### connect传参风格
+
+&emsp;&emsp;`connect`的入参有多种处理方式，得到的效果也不同（主要是是否根据绑定内容`rerender`），我们需要结合自身场景决定哪种使用：
+
+![](connect.jpg)
+
+&emsp;&emsp;另外官方推荐在`mapDispatchToProps`中采用传对象的**简写**格式（`dispatch => bindActionCreators({ xxx }, dispatch)`的简写）。这些处理都可以通过`this.props.xxx`直接进行`dispatch`。当然在不传`mapDispatchToProps`的情况下，也会为你默认绑定一个`dispatch`方法到`props`上，交由开发者手动处理。
+
+![](intro.jpg)
+
+&emsp;&emsp;PS，`connect`也可以使用装饰器的写法。
+
+#### 异步中间件
+
+#### 架构图
+
+![](infra.jpg)
