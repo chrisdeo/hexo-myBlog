@@ -10,13 +10,17 @@ tags:
 
 <escape><!-- more --></escape>
 
-### 多ScrollView嵌套时嵌套问题
+### ScrollView
+
+#### 多ScrollView嵌套问题
 
 &emsp;&emsp;具体表现是，IOS表现形式与Android不同：Android在父子ScrollView嵌套场景下，子ScrollView滚到到顶部会直接联动（触发）父级的ScrollView滚动，而IOS并不会。该问题没有特别好的解决方案，临时的方案是根据滚动监听滚动条高度，达到顶部后渐进设置父级滚动到顶部。
 
 &emsp;&emsp;另外一个体现是父子嵌套时，想要的效果是子列表滚动到底后再触发父级的向下滚动，Android没问题，IOS须要特殊处理，方案采用的是官方提供的IOS平台使用的API：`canCancelContentTouches`，当值为`false`时，一旦有子节点响应触摸操作，即使手指开始移动也不会拖动滚动视图。默认值为`true`（在以上情况下可以拖动滚动视图）。
 
-### react-native-svg报错问题
+### react-native-svg
+
+#### 安装、配置报错问题
 
 &emsp;&emsp;项目的实现主要依赖`react-native-svg`的库，语法其实还是`svg`的语法。不过我起初在模拟器中使用的时候，报了一个`RNSVGXXX`的错误，实体机上无影响。根据`npm`库的文档说明及一些博客相关问题记录最终解决：
 
@@ -39,7 +43,11 @@ implementation project(':react-native-svg')
 
 5. 重新装一次app，`react-native run-android`
 
-### 进度动画数值与进度不同步问题
+#### svg画布中元素在实体机上并未按照中心居中
+
+&emsp;&emsp;该问题的解决方案很简单，其实就是一个`viewBox`属性，估计没怎么使用过`svg`直接使用该库进行业务实现时，很容易出现问题（不加`viewBox`）。`viewBox`支持接收4个参数：x轴偏移，y轴偏移，宽度，高度。它主要用于保持我们绘制图像的比例到实际svg画布中（有可能我们绘画的大小大于给定的svg容器大小）。其中的比例调整机制依赖于另一个隐式默认声明的属性`preserveAspectRatio`，默认情况下为`xMidYMid meet`，即x轴中心与y轴中心对齐，并调整比例至画布能够完全显示内容。
+
+#### 进度动画数值与进度不同步问题
 
 &emsp;&emsp;能够使用`react-native-svg`后，在实现业务场景时（一个椭圆形的进度条），遇到了数值与进度不同步问题，解决方案主要从两方面出发：
 
@@ -89,3 +97,17 @@ Animated.timing(
     />
 </Svg>
 ```
+
+### FlatList
+
+#### 在未进行滚动时，初始化列表数据会自动调用一次onEndReached
+
+&emsp;&emsp;该问题主要是框架本身的问题，github的issue区也有人提类似的问题，一开始想通过内容高度和容器高度去做判断，不过后来发现当前组件的`onLayout`返回的变化高度是固定值，即上边栏下的所有空间，用目测估计的方式条目高度显然是不合适的，即使能够确定单个栏目高度，分组和`margin`都很难精准处理。所以最后采用了标记量的方式，初始化`this.shouldFetchMore`为`false`，既然会默认触发，则在触发函数内通过该标记`return`，另外通过`FlatList`的`onMomentumScrollBegin`进行`this.shouldFetchMore`设置，即产生滑动后才能触发加载更多数据。
+
+#### 未滚动到底部便触发了onEndReached
+
+&emsp;&emsp;`onEndReachedThreshold`配合使用，设置尽量小，结合实际体现，项目中取值`0.01`。
+
+#### 滚动到底部同时触发多次onEndReached
+
+&emsp;&emsp;典型的节流场景，写个节流闭包即可。
