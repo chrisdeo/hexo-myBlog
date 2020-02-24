@@ -110,4 +110,8 @@ Animated.timing(
 
 #### 滚动到底部同时触发多次onEndReached
 
-&emsp;&emsp;典型的节流场景，写个节流闭包即可。
+&emsp;&emsp;典型的节流场景，写个节流闭包即可。注意`throttle`不能在`render`中通过匿名函数的方式实现，因为每次在`render`后的
+
+#### IOS在数据未撑满首屏时，onRefresh在第二次调用时会触发onEndReached
+
+&emsp;&emsp;这个问题属实奇葩，Android在处理好前面的几个问题后，已经可以正常使用了，
