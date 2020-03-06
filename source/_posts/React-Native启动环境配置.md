@@ -24,3 +24,4 @@ tags:
 10. `adb devices`显示当前与电脑连接的手机设备，用于传输调试。可能会报`adb server version (31) doesn't match this client (41); killing => server`，检查下是否有鲁大师之类的程序占用。如果没有，报了该问题依旧有显示正确的连接设备可以无视。
 11.  除了真机调试外，亦可用模拟器连接调试；Android Studio初始化一个 or 安装一个手游模拟器（夜神模拟器）。目前我自己就是使用的夜神，体验还不错。
 12. 夜神模拟器调试流程：先安装软件，进入安装目录下的bin目录，键入` nox_adb connect localhost:62001 `。端口只是一个约定，为的是你使用 `adb connect localhost:62001` （不要在`/nox/bin`下键入，否则也会视作`nox_adb`）将模拟器连接上。（连接上，才能通过前面的`react-native run-android`将调试apk装进去）
+13. 可能拉出来的项目代码中没有生产`ios`及`android`目录，当执行`react-native run-android`时会报`error Android project not found. Are you sure this is a React Native project?`，此时执行`react-native eject`即可。（似乎新版本的RN中该方法被移除了）

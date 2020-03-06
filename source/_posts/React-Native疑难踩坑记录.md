@@ -114,4 +114,47 @@ Animated.timing(
 
 #### IOS在数据未撑满首屏时，onRefresh在第二次调用时会触发onEndReached
 
-&emsp;&emsp;这个问题属实奇葩，Android在处理好前面的几个问题后，已经可以正常使用了，
+&emsp;&emsp;这个问题属实奇葩，Android在处理好前面的几个问题后，已经可以正常使用了，但是在IOS端，进行第一次`onRefresh`触发，无异常，但是第二次触发`onRefresh`就会错误触发`onEndReached`（没有看错，就是在调用完`onRefresh`直接触发`onEndReached`，若没进行前面的操作，将会无限调用）。最初的做法是通过`onScrollBegin`回调参数`nativeEvent`中的`layoutMeasurement`和`contentSize`去进行标记量控制：
+
+```javascript
+  onScrollBegin = (e) => {
+    const { layoutMeasurement, contentSize } = e.nativeEvent;
+    // IOS在未撑满首屏时 第二次下拉刷新onRefresh 会触发onEndReached
+    if (layoutMeasurement.height > contentSize.height) {
+      this.stopIOSEndReachedAfterRefresh = true;
+    } else {
+      this.stopIOSEndReachedAfterRefresh = false;
+    }
+    this.shouldFetchMore = true
+  }
+```
+
+&emsp;&emsp;当然看到这里，大家都发现了以上的这些应对方案是治标不治本的，即使我们现阶段能够cover住所有的case，亦难以保证未来又会有哪些奇葩场景，所以最后的方案就是，**不要在FlatList中使用`onEndReached`，取而代之的是使用`onScroll`判断滚动位置从而进行数据拉取**。
+
+#### onScroll替代onEndReached
+
+&emsp;&emsp;其实方法跟上面类似，也是通过滚动事件回馈的内容（`FlatList`）高度与窗体高度计算，只不过我们的上拉刷新是要在下边缘触发，所以判定条件即计算动态差值进行数据拉取的触发：
+
+```javascript
+  onScroll(e) {
+    let y = e.nativeEvent.contentOffset.y
+    let layoutHeight = e.nativeEvent.layoutMeasurement.height
+    let contentHeight = e.nativeEvent.contentSize.height
+    if (Math.abs(y + layoutHeight - contentHeight) < 1) {
+      // fetch API
+    }
+  }
+```
+
+### react-navigation
+
+&emsp;&emsp;目前项目中使用的是3.x版本的`react-navigation`库，说实话以前主PC端开发使用惯了`react-router`的我对此有点不适，因为当前版本中的`header`配置（移动端头部区域）是通过类的静态方法控制的，这意味着什么呢？这意味着对于一个组件我无法将要配置的路由状态放在`state`中维护（静态方法无法通过实例访问）。取而代之的需要手动在对于触发节点使用`navigation.setParams`设置...同样的一些需要涉及到组件内部状态数据的一些方法，我也无法在静态方法中直接调用，还要`setParams`进去，属实反人类...
+
+### BackHandler
+
+&emsp;&emsp;这个类比较有意思，主要在物理键返回定制的场景涉及到，比如要根据表单数据拦截返回，提示弹窗云云。常规方案就是通过`addEventListener`挂一个监听函数，从而进行拦截（`return true`）。
+
+```javascript
+    doSth = () => { return true }
+    BackHandler.addEventListener('hardwareBackPress', this.doSth)
+```
