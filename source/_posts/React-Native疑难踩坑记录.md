@@ -148,7 +148,15 @@ Animated.timing(
 
 ### react-navigation
 
+#### static属性配置问题
+
+##### 传参
+
 &emsp;&emsp;目前项目中使用的是3.x版本的`react-navigation`库，说实话以前主PC端开发使用惯了`react-router`的我对此有点不适，因为当前版本中的`header`配置（移动端头部区域）是通过类的静态方法控制的，这意味着什么呢？这意味着对于一个组件我无法将要配置的路由状态放在`state`中维护（静态方法无法通过实例访问）。取而代之的需要手动在对于触发节点使用`navigation.setParams`设置...同样的一些需要涉及到组件内部状态数据的一些方法，我也无法在静态方法中直接调用，还要`setParams`进去，属实反人类...
+
+##### 头部样式
+
+&emsp;&emsp;问题主要出现在我需要限制最长显示长度的场景，多余的内容转省略号，其实这个功能在设置样式`maxWidth`后就可以实现了，不过中间出现了一些问题：根据官方文档我们知道，当我们设置`headerTitle`为字符串时，其实最终会被处理渲染成RN的`Text`组件，由于我们之前是对`headerTitleStyle`设置了最大长度，此时相对于外层容器来说，并没有进行居中化，还须要再设置一个`headerTitleContainerStyle` 进行限制。
 
 ### BackHandler
 
