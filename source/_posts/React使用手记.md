@@ -36,22 +36,24 @@ tags:
 
 &emsp;&emsp;这里我只讲表现形式，底层原理有时间各位可以自行研究~
 
-1. **合并更新问题**，即当我们在一个函数内对**同一属性**进行多次`setState`时，仅会以最后一次的属性变化进行更新；
+1. **合并更新问题**，当我们在一个函数内进行多次`setState`时，存在**覆盖性**对同一属性进行多次`setState`，取最后一次执行和**合成性**多次`setState`动作会合并成一次。
 
-2. **引用类型更新问题**，该问题可以大致总结为修改引用类型的`state`属性，再对其`setState`不会重新`render`；
+2. **注意PureComponent使用下可能带来的问题**，由于`PureComponent`实现了浅层拷贝版本的`ShouldComponentUpdate`，当我们进行引用类型的`setState`时，当前组件不会产生更新（相同引用地址`return true`）。而当我们使用`PureComponent`时往往是为了带来一些性能优化的（避免父组件发生`render`，子组件`props`未改变却也造成了额外的`rerender`），所以须要我们注意潜在的认知bug。
 
 ```javascript
-let { arr } = this.state; // arr = [1,2,3]
+// PureComponent下
+let { arr, obj } = this.state; // arr = [1,2,3], obj = { name: 'Leo' }
 arr[0] = 5;
-this.setState({arr}) // arr = [5,2,3]
-// 虽然 arr 内部元素改变了 但对React而言 它还是指向一个引用 即未发生改变 不会触发render
+obj.name = 'Tony'
+this.setState({arr, obj}) // arr = [5,2,3] obj = { name: 'Tony' }
+// 虽然 arr、obj 内部元素改变了 但由于当前进行的是浅层比较 它们还是指向之前的引用 并未发生改变 所以不会触发render
 ```
 
-&emsp;&emsp;对于对象通常可以采用`Object.assign({}, this.state.xxx)`、`{...this.state.xxx}`的方式、数组则可以使用解构或拼接重新赋值`[...this.state.xxx]`，`[].concat()`的方式。
+&emsp;&emsp;处理方式：对于对象通常可以采用`Object.assign({}, this.state.xxx)`、`{...this.state.xxx}`的方式、数组则可以使用解构或拼接重新赋值`[...this.state.xxx]`，`[].concat()`的方式。
 
-&emsp;&emsp;PS. 在React-Native中似乎有一些别的处理，实践发现引用类型的`setState`可以正常触发变化（不过PC端项目是肯定不行的，希望注意，尽量统一修改方案）
+3. **同步还是异步，如何同步获取更新后的数据**，`setState`由于其底层的判断执行机制，会给我们一种“异步”的感觉，但本质上它还是同步实现的。在我们的**生命周期**及**合成事件**中表现为异步，在**原生事件(addEventListener)**及`setTimeout`中表现为同步（为什么这类情况下不是异步表现，可以简单理解为Event Loop下的机制React无法介入修改，而生命周期和合成事件相关都是React自身定义并规定执行流程的）。
 
-3. **如何同步获取更新后的数据**，`setState`由于其底层的批更新和判断机制，会给我们一种“异步”的感觉，但本质上它还是同步实现的，我们经常会遇到一种场景是先对`state`内的数据进行更新（如`fetch`我们的数据然后在组件中保持状态），再对该数据操作。假如我们按下面的操作肯定是不行的，拿到的还是初始状态值：
+&emsp;&emsp;我们经常会遇到一种场景是先对`state`内的数据进行更新（如`fetch`我们的数据然后在组件中保持状态），再对该数据操作。假如我们按下面的操作肯定是不行的，拿到的还是初始状态值：
 
 ```javascript
 // state.number 0
@@ -87,10 +89,6 @@ setTimeout(() => {
 	console.log(this.state.number) // 1
 }, 0)
 ```
-
-&emsp;&emsp;这种情况可以简单理解为在`setState`机制内部无法对Event-Loop的执行顺序控制，走了同步行为的分支判断，最终以同步表现。
-
-4. 原生事件下的`setState`也表现为同步，何谓原生事件，即通过`addEventListener`这种方式绑定的，与之对应的是React自身封装构造的合成事件（见下文）； 
 
 ### 合成事件与函数绑定问题
 
@@ -158,7 +156,9 @@ export default class Demo extends PureComponent {
 
 ![](unsafe.jpg)
 
-&emsp;&emsp;原因在于React在v16版本中采用了新的异步Fiber架构，这种架构下，React的渲染是切片式的，有点像计算机系统中的任务调度，它会将渲染分为两个阶段：`render`和`commit`。在`render`阶段，如果遇到紧急任务，会将之前做的事情全部舍弃，优先执行，然后再重新执行之前的任务。这也是为什么不要在`componentWillMount`中进行AJAX请求的原因。显然我们不会期望多次进行请求。不过`componentWillMount`也是React进行SSR时唯一能介入的生命周期函数。官方也建议在`constructor`内初始化`state`，而不要在`componentWillMount`内`setState`:
+&emsp;&emsp;原因在于React在v16版本中采用了新的异步Fiber架构，这种架构下，React的渲染是切片式的，有点像计算机系统中的任务调度，它会将渲染分为两个阶段：`render`和`commit`。在`render`阶段，如果遇到紧急任务，会将之前做的事情全部舍弃，优先执行，然后再重新执行之前的任务。这也是为什么不要在`componentWillMount`中进行AJAX请求的原因（可能会因为一些奇奇怪怪的原因触发多次）。另外，如果在SSR时，`componentWillMount`中的数据请求会被执行两次（客户端、服务端各一次）。
+
+&emsp;&emsp;官方也建议在`constructor`内初始化`state`，而不要在`componentWillMount`内`setState`:
 
 ![](willMount.jpg)
 
@@ -167,6 +167,10 @@ export default class Demo extends PureComponent {
 ![](didMount.jpg)
 
 &emsp;&emsp;你或许会对获取请求数据后在`componentDidmount`中`setState`触发额外的`render`抱有疑惑，我当年也有，不过上图也给出了解答：额外的`render`会在浏览器更新屏幕前进行触发，所以即便有多次`render`用户也不会感知。
+
+### 受控与非受控组件
+
+&emsp;&emsp;可以简单理解为表单域的值是否受`state`控制。
 
 ## 数据管理
 
