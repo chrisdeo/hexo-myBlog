@@ -30,7 +30,13 @@ tags:
 
 ![](watcher.png)
 
-## React初期易混淆点
+## React开发注意点
+
+### 命名要求
+
+&emsp;&emsp;React**组件声明时，第一个字母须大写**；
+
+&emsp;&emsp;React中的**事件、属性命名须遵守驼峰规范，如`className`、`onClick`等等**；
 
 ### setState问题
 
@@ -94,10 +100,6 @@ setTimeout(() => {
 
 &emsp;&emsp;先说**合成事件（SyntheticEvent）**，对Web应用来说，存在很多不同浏览器的兼容问题，过去需要我们根据不同环境做兼容处理，而现在React内已经帮我们做好了统一的封装，所以在React中的一些如`onClick`触发的回调已经不是我们原生的点击事件了。就拿事件冒泡来说，过去我们可以直接`return false`阻断继续冒泡，但是从`v0.14`版本开始就无效了，须要严格执行`e.stopPropagation()`或者`e.preventDefault()`。原生的绑定即前文提到的`addEventListener`。
 
-&emsp;&emsp;React组件声明时，第一个字母须大写；
-
-&emsp;&emsp;React中的事件、属性命名须遵守驼峰规范；
-
 &emsp;&emsp;再说**函数绑定问题**，先看如下几种绑定方式：
 
 ```javascript
@@ -143,6 +145,10 @@ export default class Demo extends PureComponent {
 ```
 
 &emsp;&emsp;以上是在`{ "loose": true }`配置下的转化，默认情况配置是`false`，会采用`Object.defineProperty`的方式。具体详情可见[babel官方](https://babeljs.io/docs/en/babel-plugin-proposal-class-properties)。
+
+### 事件系统的冒泡捕获
+
+&emsp;&emsp;
 
 ### 生命周期
 
