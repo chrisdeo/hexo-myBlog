@@ -146,9 +146,48 @@ export default class Demo extends PureComponent {
 
 &emsp;&emsp;以上是在`{ "loose": true }`配置下的转化，默认情况配置是`false`，会采用`Object.defineProperty`的方式。具体详情可见[babel官方](https://babeljs.io/docs/en/babel-plugin-proposal-class-properties)。
 
-### 事件系统的冒泡捕获
+### React事件系统的冒泡捕获
 
-&emsp;&emsp;
+&emsp;&emsp;React的合成事件其实是统一冒泡到`document`上，再通过`dispatchEvent`进行处理的。当我们进行一些DOM事件绑定时，应当尽可能地使用合成事件处理，避免原生绑定和合成事件绑定混用，可以看下面的输出例子：
+
+```javascript
+  componentDidMount() {
+    this.parent.addEventListener('click', (e) => {
+      console.log('dom parent');
+    })
+    this.child.addEventListener('click', (e) => {
+      console.log('dom child');
+    })
+    document.addEventListener('click', (e) => {
+      console.log('document');
+    })
+  }
+
+  childClick = (e) => {
+    console.log('react child');
+  }
+
+  parentClick = (e) => {
+    console.log('react parent');
+  }
+
+  render() {
+    return (
+      <div onClick={this.parentClick} ref={ref => this.parent = ref}>
+        <div onClick={this.childClick} ref={ref => this.child = ref}>
+          test
+        </div>
+      </div>)
+  }
+```
+
+&emsp;&emsp;当我们点击test时，最终依次输出结果：
+
+- dom child
+- dom parent
+- react child
+- react parent
+- document
 
 ### 生命周期
 
@@ -174,9 +213,146 @@ export default class Demo extends PureComponent {
 
 &emsp;&emsp;你或许会对获取请求数据后在`componentDidmount`中`setState`触发额外的`render`抱有疑惑，我当年也有，不过上图也给出了解答：额外的`render`会在浏览器更新屏幕前进行触发，所以即便有多次`render`用户也不会感知。
 
+#### getDerivedStateFromProps
+
+&emsp;&emsp;这个静态方法是在v16.3时出现的，目的其实就是为了渐进废弃之前`render`前的一些Cycle：
+
+ - componentWillReceiveProps
+ - componentWillMount
+ - componentWillUpdate
+
+&emsp;&emsp;那为什么要干掉这些Cycle呢？因为过去有太多人会在这些周期里做一些带有副作用的事情，比如典型的发AJAX请求等等。
+
+&emsp;&emsp;需要注意的是，在16.3版本这个生命周期只有在父组件重新渲染时，当前子组件才会被连带触发，而子组件本身`setState`则不会触发。另外从16.4版本开始已经兼容成了`setState`和`forceUpdate`都会触发。
+
+```javascript
+class ExampleComponent extends React.Component {
+  static getDerivedStateFromProps(nextProps, prevState) {
+    // Called after a component is instantiated or before it receives new props.
+    // Return an object to update state in response to prop changes.
+    // Return null to indicate no change to state.
+  }
+
+  UNSAFE_componentWillMount() {
+    // New name for componentWillMount()
+    // Indicates that this method can be unsafe for async rendering.
+    // Prefer componentDidMount() instead.
+  }
+
+  UNSAFE_componentWillUpdate(nextProps, nextState) {
+    // New name for componentWillUpdate()
+    // Indicates that this method can be unsafe for async rendering.
+    // Prefer componentDidUpdate() instead.
+  }
+
+  UNSAFE_componentWillReceiveProps(nextProps) {
+    // New name for componentWillReceiveProps()
+    // Indicates that this method can be unsafe for async rendering.
+    // Prefer static getDerivedStateFromProps() instead.
+  }
+}
+```
+
+&emsp;&emsp;改动Reason参见[官方RFC](https://github.com/reactjs/rfcs/blob/master/text/0006-static-lifecycle-methods.md)。
+
+#### getSnapshotBeforeUpdate
+
+&emsp;&emsp;在16.3版本中还引入了一个新的生命周期`getSnapshotBeforeUpdate`，其实这玩意我们基本没啥用到的场景，其功能就是在下一次更新DOM前提供了一个介入操作数据（`snapshot`）的时机。
+
+```javascript
+getSnapshotBeforeUpdate(prevProps, prevState) {
+	console.log('#enter getSnapshotBeforeUpdate');
+	// 返回值即我们在componentDidUpdate中接收到的快照属性
+	return 'foo';
+}
+
+componentDidUpdate(prevProps, prevState, snapshot) {
+	console.log('#enter componentDidUpdate snapshot = ', snapshot);
+}
+```
+
 ### 受控与非受控组件
 
 &emsp;&emsp;可以简单理解为表单域的值是否受`state`控制。
+
+## 冷门API
+
+&emsp;&emsp;冷门但不代表没用，下面提几个：
+
+ - forceUpdate
+ - createPortal
+ - Children
+ - cloneElement
+
+### forceUpdate
+
+![](forceUpdate.jpg)
+
+&emsp;&emsp;`forceUpdate`通常在我们不依赖组件本身`state`进行更新时触发，即我们开发者本身确认一些别的属性变化须要强制触发组件进行更新时使用。这种方法会直接跳过当前组件的SCU，但不会影响子组件的正常SCU。
+
+&emsp;&emsp;PS：大多数场景我们不需要这个API，根据`props`、`state`控制即可。
+
+### createPortal
+
+![](createPortal.jpg)
+
+&emsp;&emsp;相当于提供我们一个方法直接在指定的DOM结构下配置，常见的应用场景就是全局模态框：
+
+![](modal.jpg)
+
+&emsp;&emsp;BTW，由于依赖ReactDOM，对于我们RN的场景是无法应用的。
+
+### Children
+
+&emsp;&emsp;我们都知道在`props`对象中还有`children`这个属性。它能够从某种程度上减少我们在一个组件内的嵌套层级，就是`props.children`对于我们开发者来说就是一个黑盒，我们对它可能传入的数据结构是不可知的（表达式、布尔、render function等等），如果我们没有对其进行操作，那其实没什么所谓。但只要我们对其进行操作了，比如下意识以为是个数组进行`props.children.map`这样的调用就要注意，非Array就直接报TypeError了。那怎么处理类似这样的情景呢？
+
+&emsp;&emsp;其实`React.Children`恰好就是为我们提供处理`props.children`数据结构能力的API，其具有的方法如下：
+
+ - map
+ - forEach
+ - count
+ - only
+ - toArray
+
+#### React.Children.map
+
+```javascript
+React.Children.map(props.children, child => {})
+```
+
+&emsp;&emsp;这个API接收两个参数，第一个就是我们通常要处理的黑盒prop.children，第二个入参回调，其实就是我们遍历的元素上下文，通过它，我们能够进行定制化的操作。
+
+&emsp;&emsp;并且根据源码，当`props.children`为`null`和`undefined`时，最终会原值返回，其余情景则是返回一个数组。
+
+#### React.Children.forEach
+
+&emsp;&emsp;跟`React.Children.map`类似，都是迭代操作，只不过这个不会返回数组。`undefined`和`null`时的判断逻辑同上。
+
+#### React.Children.count
+
+&emsp;&emsp;返回其中内部元素数，其值与前面两个迭代方法的回调触发次数相等。
+
+#### React.Children.only
+
+&emsp;&emsp;用于判断传入的`children`是否只有一个`child`。注意接收类型是`React element`。不能拿`React.Children.map()`返回的结果再去判断是几个`child`，因为此时你拿到的已然是一个`Array`类型。
+
+### cloneElement
+
+&emsp;&emsp;前文中我们通过`React.Children`的类方法得到了访问本是黑盒的`props.children`的能力。`React.cloneElement`则是能让我们在操作`React element`时，进行浅层的新`props merge`，传入的新`children`则会替换旧的`children`。原element的`key`和`ref`都会保留。
+
+&emsp;&emsp;先看一下API定义：
+
+```javascript
+React.cloneElement(
+  element,
+  [props],
+  [...children]
+)
+```
+
+&emsp;&emsp;由于是拷贝返回一个新的组合元素，`React.cloneElement`处理`element`时可以大致理解成`<element.type {...element.props} {...props}>{children}</element.type>`。
+
+&emsp;&emsp;对于一些有公共方法或属性须要传递的组件，我们能够提前将其需要的信息配置进去。举个[例子](https://codesandbox.io/s/cloneele-0oxo6)。
 
 ## 数据管理
 
