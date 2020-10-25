@@ -166,3 +166,31 @@ Animated.timing(
     doSth = () => { return true }
     BackHandler.addEventListener('hardwareBackPress', this.doSth)
 ```
+
+### Image
+
+#### 请求远端uri的缓存问题
+
+&emsp;&emsp;该问题出现在我使用Image组件加载一个远程图片`uri`的场景，并且只在`android`平台出现。由于远程图床生成图片有数量限制，超过数量则会覆盖以前的，即超过限制数量的图片请求的uri将会拿到以前请求过一模一样的uri，对于`ios`，RN的底层应该是做了不会缓存每次请求都会取最新的内容，但`android`则会拿之前请求过的资源展现；类似于我们浏览器的强缓存现象。由于是组件自身的配置，我们没办法设置该http请求的请求头，推荐解决方式就是在`uri`后拼接一个`hash`，可以使用时间戳的方式实现。服务端只会解析前面读取图片下载的请求，而手机端（客户端）也能理解是一个全新的请求，不走缓存。
+
+### 布局后的位置计算
+
+#### onLayout
+
+&emsp;&emsp;该属性可以在组件构造布局完毕后回调，这样我们就可以在这个时机获取准确的位置。
+
+#### ref的measure方法
+
+```javascript
+handleOnLayout = e => {
+	this.someCompRef.current.measure((x, y, width, height, left, top) => {
+		// do sth to trigger view
+	})
+}
+```
+
+&emsp;&emsp;这种调整样式布局方式常用在我们使用自适应，百分比，按设计图比例定制失效时使用。
+
+### react-native-gesture-handler
+
+&emsp;&emsp;`react-navigation`内部有使用该库进行手势返回的支持，该库需要升级到`1.5.1`版本后再使用，否则会有顶部引入缺失的报错。具体原因可以官方issue的版本发布changelog。
