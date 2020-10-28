@@ -12,6 +12,22 @@ tags:
 
 &emsp;&emsp;React-Native让前端开发者也具备了APP开发的能力，我们通过编写JS，最后编译直出`android`、`ios`应用代码...下面就看看windows环境下配置会遇到哪些问题：
 
+&emsp;&emsp;附： 先安装JDK和Android Studio会减少后面很大的工作量，两者安装后注意配置对应系统环境变量：
+
+&emsp;&emsp;配置JAVA环境变量：`JAVA_HOME`：
+
+![](jdk.jpg)
+
+&emsp;&emsp;配置Android环境变量：`ANDROID_HOME`：
+
+![](android.jpg)
+
+&emsp;&emsp;配置进系统`Path`：
+
+![](path.jpg)
+
+&emsp;&emsp;之后进行RN环境搭建：
+
 1. 首先，确保Node版本够高，version >= 10.0.0。若须要更新直接去官方下载.msi，安装会覆盖之前版本。
 2. 拉取项目代码，由于新工地使用的是svn，安装GUI后，使用`svn checkout`对应仓库地址直接拉取。
 3. `npm install`。
