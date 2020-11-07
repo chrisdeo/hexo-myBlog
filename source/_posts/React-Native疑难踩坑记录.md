@@ -194,3 +194,69 @@ handleOnLayout = e => {
 ### react-native-gesture-handler
 
 &emsp;&emsp;`react-navigation`内部有使用该库进行手势返回的支持，该库需要升级到`1.5.1`版本后再使用，否则会有顶部引入缺失的报错。具体原因可以官方issue的版本发布changelog。
+
+### 错误捕获
+
+#### 全局的异常捕获
+
+&emsp;&emsp;注：这个全局不包括promise内的异常，主要作用对象包括一些未`catch`的同步异常及同步代码里的timer类异常。
+
+&emsp;&emsp;在升级0.62版本后，RN项目在安卓端运行时出现过一个很诡异的crash问题:
+
+```javascript
+// TypeError: t is not a function. (In 't(n)', 't' is "change")
+// UncaughtException detected: com.facebook.react.common.JavascriptException
+```
+
+&emsp;&emsp;两端都没有该问题的定位方案，并且该问题在本地调试无法复现（控制台不会有任何异常打印），即只有部署服务器后才会出现。
+
+&emsp;&emsp;最终的解决策略是利用RN端自身的全局错误捕获能力将该异常吞掉，根据安卓端的说法是这样处理异常不会冒泡到外层的容器被java捕获导致抛错引发crash，其实是治标但是暂无有效方法定位该问题：
+
+```javascript
+global.ErrorUtils.setGlobalHandler(e => {
+  console.log('异常捕获信息：', e.message)
+  printToApp('原生端打印错误信息：', e.message)
+})
+```
+
+#### promise异常捕获
+
+&emsp;&emsp;其实是利用facebook扩展的Promise方法：
+
+```javascript
+require('promise/setimmediate/rejection-tracking').enable({
+      allRejections: true,
+      onUnhandled: (id, error = {}) => {
+        let message
+        let stack
+  
+        const stringValue = Object.prototype.toString.call(error);
+        if (stringValue === '[object Error]') {
+          message = Error.prototype.toString.call(error);
+          stack = error.stack;
+        } else {
+          /* $FlowFixMe(>=0.54.0 site=react_native_oss) This comment suppresses
+           * an error found when Flow v0.54 was deployed. To see the error delete
+           * this comment and run Flow. */
+          message = require('pretty-format')(error);
+        }
+  
+        const warning =
+          `Possible Unhandled Promise Rejection (id: ${id}):\n` +
+          `${message}\n` +
+          (stack == null ? '' : stack);
+        console.warn(warning);
+        // promise未捕获的异常进行页面降级处理
+        this.setState({
+          showErrorPage: true
+        })
+      },
+      onHandled: id => {
+        const warning =
+          `Promise Rejection Handled (id: ${id})\n` +
+          'This means you can ignore any previous messages of the form ' +
+          `"Possible Unhandled Promise Rejection (id: ${id}):"`;
+        console.warn(warning);
+      },
+});
+```
