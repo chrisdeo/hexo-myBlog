@@ -260,3 +260,56 @@ require('promise/setimmediate/rejection-tracking').enable({
       },
 });
 ```
+
+### TextInput
+
+&emsp;&emsp;近期实现了一个业务场景：点击页面上的键盘按钮，弹出一个输入框，并且下面是系统自带的键盘区域。熟悉RN的都知道，我们在RN端唯一能弹起原生键盘的方式就是结合`TextInput`组件。根据官方文档，它有一个`autoFocus`属性，当输入框聚焦时，原生键盘会被自动唤起。然而实际情况却并非如此。在我的开发过程中，遇到了非常多奇怪的表现不一致问题，同一套代码，不同的机型，系统表现都不一致。不过幸运的是，最后都成功解决，这里记录下我的尝试路径。
+
+&emsp;&emsp;首先我的键盘区域需要在一个弹出蒙层中触发，所以最外层有一个全屏的蒙层动效`Drawer`组件，根据视觉输出`TextInput`需要放在一个定制的`View`组件中进行布局定制，于是我们有大致下面的嵌套结构：
+
+```javascript
+	<Drawer>
+		<View>
+			<TextInput />
+		</View>
+	</Drawer>
+```
+
+&emsp;&emsp;接着我按照如下的步骤进行了尝试及优化，最终得到了稳定的弹出结果：
+
+- 版本一： 仅设置`TextInput`的`autoFocus`属性为`true`；通过控制`Drawer`的挂载来进行整个输入框的显隐。结果：ios表现正常，android大部分有问题，主要表现为可以显示输入框，但是原生键盘没有唤起，显示上输入框有聚焦效果。须要二次点击输入框才能唤起键盘。
+- 版本二： 分析版本一的过程中发现仅控制`Drawer`的挂载，实际上外层卸载的时候，没有卸载到`TextInput`组件，跟我们通常的理解不一致（有可能是安卓系统的一些内部处理问题）。于是在此基础上，我对每一层嵌套都使用了同一个哨兵变量控制强制挂载和卸载。结果：比版本一略好，但是还是经常出现无法唤起的问题。
+- 版本三： 在版本二的基础上，将`autoFocus`的布尔属性也放入`state`中进行控制，企图达到重新聚焦唤起的作用。控制`autoFocus`的回调我放入了`TextInput`的`onLayout`中触发，确保输入框出现后再进行唤起。结果：ios都正常唤起，大部分android正常唤起，仅少部分机型仍须二次点击。
+- 最终版本： 不使用`autoFocus`，直接使用`ref`控制输入框，调用输入框`focus`方法。在`onLayout`的回调中设置一定延时（时间比较关键，取0让系统自己决定不行，我这边取了`50ms`），确保`ref`能拿到内容，同时要触发一次页面`rerender`。这种方式比较hack，但能得到稳定的效果，代码如下：
+
+```javascript
+ // ...
+ handleTextInputDidMount = () => {
+	 // event loop to avoid engine render?
+	 let handler = setTimeout(() => {
+		 this.textInput && this.textInput.focus()
+		 clearTimeout(handler)
+	 }, 50)
+	 // hack. without this, u might not call the keyboard
+	 this.forceUpdate()
+ }
+ render() {
+	 return (
+		 // ...
+		 isTextInputShow && <Drawer>
+			{
+				isTextInputShow && <View>
+					{
+						isTextInputShow && <TextInput
+							onLayout={this.handleTextInputDidMount}
+							ref={textInput => this.textInput = textInput}
+						/>
+					}
+				</View>
+			}
+		 </Drawer>
+	 )
+ }
+```
+
+&emsp;&emsp;看上去很挫，但是it really works（摊手
