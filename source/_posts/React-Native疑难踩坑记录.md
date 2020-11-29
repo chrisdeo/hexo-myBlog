@@ -167,6 +167,10 @@ Animated.timing(
     BackHandler.addEventListener('hardwareBackPress', this.doSth)
 ```
 
+####  标题栏在IOS下有条黑线(borderBottom)
+
+&emsp;&emsp;`headerStype`中设置`headerTransparent: true`(IOS), `elevation:0`（Android）。参加[issue](https://github.com/react-navigation/react-navigation/issues/2457)。
+
 ### Image
 
 #### 请求远端uri的缓存问题
@@ -313,3 +317,11 @@ require('promise/setimmediate/rejection-tracking').enable({
 ```
 
 &emsp;&emsp;看上去很挫，但是it really works（摊手
+
+### border-radius
+
+&emsp;&emsp;iphone 6 上失效, 添加`overflow:'hidden'`样式可解决。
+
+### Dimensions.get('window')与Dimensions.get('screen')的选择
+
+&emsp;&emsp;window为app开启后的可视窗口大小对象，screen是设备的整个屏幕大小对象。一般来说我们需要获取screen的参数按照GUI设计参数进行计算适配。但是由于安卓系统多样性，`Dimensions.get('screen')`有时会获取到不准确的值，所以目前还是推荐使用`Dimensions.get('window')`。
