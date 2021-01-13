@@ -37,6 +37,287 @@ module.exports = function bind(fn, thisArg) {
 
 &emsp;&emsp;其实就是在ES5下，实现了一个`bind`，返回一个闭包，最后返回绑定`this`的调用返回结果。
 
+## adapters
+
+&emsp;&emsp;根据文件目录，及README.md，该模块主要进行浏览器端及Node端的网络请求兼容，它会处理成一个request请求进行dispatch，并且当response返回后，处理返回一个Promise。
+
+## cancel
+
+&emsp;&emsp;这个模块进行了基本的Cancel对象封装，主要用于判断请求是否被Cancel以及如何进行请求的Cancel。
+
+### Cancel.js
+
+&emsp;&emsp;构造了一个Cancel函数，初始化`message`信息，原型链上重载了`toString`方法以及添加了`__CANCEL__`标记变量：
+
+```javascript
+'use strict';
+
+/**
+ * A `Cancel` is an object that is thrown when an operation is canceled.
+ *
+ * @class
+ * @param {string=} message The message.
+ */
+function Cancel(message) {
+  this.message = message;
+}
+
+Cancel.prototype.toString = function toString() {
+  return 'Cancel' + (this.message ? ': ' + this.message : '');
+};
+
+Cancel.prototype.__CANCEL__ = true;
+
+module.exports = Cancel;
+```
+
+### CancelToken.js
+
+&emsp;&emsp;`CancelToken`是一个用于进行请求取消操作的对象：
+
+```javascript
+'use strict';
+
+var Cancel = require('./Cancel');
+
+/**
+ * A `CancelToken` is an object that can be used to request cancellation of an operation.
+ *
+ * @class
+ * @param {Function} executor The executor function.
+ */
+function CancelToken(executor) {
+  if (typeof executor !== 'function') {
+    throw new TypeError('executor must be a function.');
+  }
+
+  var resolvePromise;
+  this.promise = new Promise(function promiseExecutor(resolve) {
+    resolvePromise = resolve;
+  });
+
+  var token = this;
+  executor(function cancel(message) {
+    if (token.reason) {
+      // Cancellation has already been requested
+      return;
+    }
+
+    token.reason = new Cancel(message);
+    resolvePromise(token.reason);
+  });
+}
+
+/**
+ * Throws a `Cancel` if cancellation has been requested.
+ */
+CancelToken.prototype.throwIfRequested = function throwIfRequested() {
+  if (this.reason) {
+    throw this.reason;
+  }
+};
+
+/**
+ * Returns an object that contains a new `CancelToken` and a function that, when called,
+ * cancels the `CancelToken`.
+ */
+CancelToken.source = function source() {
+  var cancel;
+  var token = new CancelToken(function executor(c) {
+    cancel = c;
+  });
+  return {
+    token: token,
+    cancel: cancel
+  };
+};
+
+module.exports = CancelToken;
+```
+
+&emsp;&emsp;通过源码阅读我们可以看出，`CancelToken`也是一个构造函数，它接受一个执行函数`executor`，内部通过一个Promise实例控制，比较有趣的是它将Promise状态改变的回调函数执行句柄提出，并在`executor`中执行后再触发。并在执行函数触发时，首次执行会调用之前`Cancel`的构造函数，并将生成的实例赋值给当前上下文的`reason`属性。在下一次再触发时，若已有`reason`内容，则不再执行该函数。
+
+&emsp;&emsp;除此之外，在axios中真正使用`CancelToken`往往不是直接通过`new`构造，而是使用函数的静态方法`source`，它通过注入一个函数的形式，从`CancelToken`内部拿到了真正进行取消动作的`cancel`函数，并将其赋值给了外层`source`函数内部的`cancel`变量，最终返回了这个`CancelToken`实例以及与其匹配的取消方法，形成一个闭包。
+
+### isCancel.js
+
+&emsp;&emsp;判断任务是否已被取消，从构造上来说，它的入参是Cancel函数构造的实例，返回值的处理也比较巧妙，运用`!!`真值处理，因为如果`value`为`undefined`，返回的就是`undefined`，真值处理会进行布尔值转换。
+
+```javascript
+'use strict';
+
+module.exports = function isCancel(value) {
+  return !!(value && value.__CANCEL__);
+};
+```
+
+### axios是怎么做请求取消的？
+
+&emsp;&emsp;了解了以上构造函数实现后，我们知道了核心是`CancelToken.source`方法以及`CancelToken`实例原型链上对应的`__CANCEL__`属性。再看看真实应用的例子from *README.md*：
+
+```javascript
+const CancelToken = axios.CancelToken;
+const source = CancelToken.source();
+
+axios.get('/user/12345', {
+  cancelToken: source.token
+}).catch(function (thrown) {
+  if (axios.isCancel(thrown)) {
+    console.log('Request canceled', thrown.message);
+  } else {
+    // handle error
+  }
+});
+
+axios.post('/user/12345', {
+  name: 'new name'
+}, {
+  cancelToken: source.token
+})
+
+// cancel the request (the message parameter is optional)
+source.cancel('Operation canceled by the user.');
+```
+
+&emsp;&emsp;从使用demo上，我们知道在axios进行请求时，我们的`CancelToken`实例作为参数传入，而取消句柄则在外部被我们开发者在对应业务场景消费，简单来说就是我们可以决定何时取消。
+
+&emsp;&emsp;那么实际我们的axios实例是如何运用以上的token和对应的cancel呢？
+
+&emsp;&emsp;1. Axios构造函数实现核心请求方法`request`，本质上不同的请求方法（`get`、`put`、`post`等）最终都会调用这个`request`。
+
+```javascript
+// Provide aliases for supported request methods
+utils.forEach(['delete', 'get', 'head', 'options'], function forEachMethodNoData(method) {
+  /*eslint func-names:0*/
+  Axios.prototype[method] = function(url, config) {
+    return this.request(mergeConfig(config || {}, {
+      method: method,
+      url: url,
+      data: (config || {}).data
+    }));
+  };
+});
+
+utils.forEach(['post', 'put', 'patch'], function forEachMethodWithData(method) {
+  /*eslint func-names:0*/
+  Axios.prototype[method] = function(url, data, config) {
+    return this.request(mergeConfig(config || {}, {
+      method: method,
+      url: url,
+      data: data
+    }));
+  };
+});
+```
+
+&emsp;&emsp;2. `request`中间的请求体会通过`interceptors`形成一个中间件进行处理，这里我们先不看具体中间件做了什么动作，聚焦到里面实际发起请求的函数`dispatchRequest`，代码中的`adapter`其实就是浏览器和Node端对应真实发起请求的方法封装，它们最终会返回一个Promise。
+
+```javascript
+  // 省略部分 ...
+  var adapter = config.adapter || defaults.adapter;
+
+  return adapter(config).then(function onAdapterResolution(response) {
+    throwIfCancellationRequested(config);
+
+    // Transform response data
+    response.data = transformData(
+      response.data,
+      response.headers,
+      config.transformResponse
+    );
+
+    return response;
+  }, function onAdapterRejection(reason) {
+    if (!isCancel(reason)) {
+      throwIfCancellationRequested(config);
+
+      // Transform response data
+      if (reason && reason.response) {
+        reason.response.data = transformData(
+          reason.response.data,
+          reason.response.headers,
+          config.transformResponse
+        );
+      }
+    }
+
+    return Promise.reject(reason);
+  });
+```
+
+&emsp;&emsp;在这个Promise的回调中，我们会判断`config`配置是否有`cancelToken`属性，即是否配置了取消请求的方法，如果有，则检查其中是否已经存在了取消的`reason`属性，这个`reason`属性根据前文，它是一个`Cancel`对象，内部是我们外部调用取消方法传入的`msg`。即如果这个`cancelToken`实例此时存在`reason`了，它就会抛出这个内部的`reason`即Cancel对象。
+
+```javascript
+/**
+ * Throws a `Cancel` if cancellation has been requested.
+ */
+function throwIfCancellationRequested(config) {
+  if (config.cancelToken) {
+    config.cancelToken.throwIfRequested();
+  }
+}
+```
+
+&emsp;&emsp;3. `adapter`我们就以浏览器端的实现`xhr.js`文件来看，可以看出浏览器端就是去构造一个`XMLHttpRequest`，在真实发送`send`前，判断`config`中是否有`cancelToken`，有则以`cancelToken`内部的`promise`来进行异步控制。通过前文的了解我们知道，在具体业务场景我们调用`cancelToken`匹配的`cancel`方法进行请求终止，其实就是将`CancelToken`内部的`promise`进行`resolve`并使得在`adapter`中进入异步等待回调的promise立马回调，将`XMLHttpRequest`的请求实例通过`abort`方法终止。然后这个axios请求的Promise将会`reject`，里面的属性就是`cancelToken`的`reason`。同时释放`request`内存。实际上在请求的各个阶段结束后，如错误、终止、完成都会清空`request`指向，这也是`CancelToken`的`promise`回调中发现`request`已经阶段完成就啥都不做的判断逻辑：
+
+```javascript
+module.exports = function xhrAdapter(config) {
+  return new Promise(function dispatchXhrRequest(resolve, reject) {
+    var requestData = config.data;
+    var requestHeaders = config.headers;
+    var request = new XMLHttpRequest();
+    // 省略...
+    request.onreadystatechange = function handleLoad() {
+      // ...
+      request = null;
+    };
+    request.onabort = function handleAbort() {
+      if (!request) {
+        return;
+      }
+      reject(createError('Request aborted', config, 'ECONNABORTED', request));
+      // Clean up request
+      request = null;
+    };
+    // Handle low level network errors
+    request.onerror = function handleError() {
+      // Real errors are hidden from us by the browser
+      // onerror should only fire if it's a network error
+      reject(createError('Network Error', config, null, request));
+
+      // Clean up request
+      request = null;
+    };
+    // Handle timeout
+    request.ontimeout = function handleTimeout() {
+      var timeoutErrorMessage = 'timeout of ' + config.timeout + 'ms exceeded';
+      if (config.timeoutErrorMessage) {
+        timeoutErrorMessage = config.timeoutErrorMessage;
+      }
+      reject(createError(timeoutErrorMessage, config, 'ECONNABORTED',
+        request));
+
+      // Clean up request
+      request = null;
+    };
+    if (config.cancelToken) {
+      // Handle cancellation
+      config.cancelToken.promise.then(function onCanceled(cancel) {
+        if (!request) {
+          return;
+        }
+
+        request.abort();
+        reject(cancel);
+        // Clean up request
+        request = null;
+      });
+    };
+    request.send(requestData);
+  });
+};
+```
+
 ## utils.js
 
 &emsp;&emsp;该文件下，主要是一些判断类型的工具方法：
@@ -228,7 +509,23 @@ function createInstance(defaultConfig) {
 }
 ```
 
-&emsp;&emsp;首先通过`Axios`构造方法`new`一个实例，其中传入默认的配置参数`defaults`。下面看看`defaults.js`内是些什么配置参数：
+&emsp;&emsp;首先通过`Axios`构造方法`new`一个实例，其中传入默认的配置参数`defaults`。该配置参数又通过`defaults.js`导出。
+
+&emsp;&emsp;`defaults.js`比较关键，它对Axios的默认请求配置进行了封装，并且其中做了浏览器端和Node端的兼容：
+
+```javascript
+function getDefaultAdapter() {
+  var adapter;
+  if (typeof XMLHttpRequest !== 'undefined') {
+    // For browsers use XHR adapter
+    adapter = require('./adapters/xhr');
+  } else if (typeof process !== 'undefined' && Object.prototype.toString.call(process) === '[object process]') {
+    // For node use HTTP adapter
+    adapter = require('./adapters/http');
+  }
+  return adapter;
+}
+```
 
 ```javascript
 var defaults = {
@@ -318,6 +615,8 @@ function Axios(instanceConfig) {
 ```
 
 &emsp;&emsp;先声明一个`Axios`函数，实例上有两个属性，一个是实例的配置信息`this.defaults`，另一个则是发起请求和接收响应的拦截器`this.interceptors`。
+
+### InterceptorManager.js
 
 &emsp;&emsp;`InterceptorManager`这个拦截器又做了什么呢？
 
@@ -424,3 +723,13 @@ Axios.prototype.request = function request(config) {
   return promise;
 };
 ```
+
+&emsp;&emsp;实际上核心还是`request`函数，它在内部通过`chain`数组结构编织了一个请求管道，默认没有配置拦截器`this.interceptors.request`及`this.interceptors.response`时，初始化值为`[dispatchRequest, undefined]`。这等价于请求时，在`promise`的回调中直接触发`resolve`状态的`dispatchRequest`，入参即请求配置`config`。
+
+&emsp;&emsp;那么当我们分别在`request`和`response`中添加拦截，塞入中间件，就是下面这样的编排结构：
+
+![](queue.jpeg)
+ 
+&emsp;&emsp;结合请求前的处理，我们可以知道从队列首部到`dispatchRequest`，是给我们中间处理`config`的，因为`dispatchRequest`最终接收参数就是一个`config`。常见应用场景如获取app token，确认当前token是否有效等。而`undefined`之后到队尾的配置就是处理`dispatchRequest`的`promise`返回的`response`的内容，如果有相关场景依赖，我们便可以在返回的`response`上构造，处理起来也是生成新的Promise返回，数据返回新的`response`。
+
+&emsp;&emsp;**综上，`chain`通过管道的概念，形成了一个`promise`链式调用，队列首到`dispatchRequest`进行`config`中间处理，`undefined`到队列尾部进行请求返回的`response`的中间处理。**
