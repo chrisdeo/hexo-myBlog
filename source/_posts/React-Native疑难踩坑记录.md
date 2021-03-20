@@ -325,3 +325,13 @@ require('promise/setimmediate/rejection-tracking').enable({
 ### Dimensions.get('window')与Dimensions.get('screen')的选择
 
 &emsp;&emsp;window为app开启后的可视窗口大小对象，screen是设备的整个屏幕大小对象。一般来说我们需要获取screen的参数按照GUI设计参数进行计算适配。但是由于安卓系统多样性，`Dimensions.get('screen')`有时会获取到不准确的值，所以目前还是推荐使用`Dimensions.get('window')`。
+
+### 字符串相关内容必须置于Text组件中
+
+&emsp;&emsp;这种问题通常发生在`未置成Boolean值的属性 && <Comp />`的场景中，其实本意上开发者是想通过隐式加短路判断的方式去控制后面组件的渲染。但如果当前面的判断属性是一个字符串或数值，比如0这样的，那最终这段返回的就是个0.就会出现一个没有被`<Text>`包裹的错误：
+
+ - `Cannot Add a child that doesn't have a YogaNode to a parent with out a measure function`
+
+### RN的Modal须通过onRequestClose来响应安卓端的物理键返回回调
+
+&emsp;&emsp;说白了，在安卓平台中，Modal的隐藏直接通过`onRequestClose`控制。不使用`BackHandler.addEventListener('hardwareBackPress', () => {}`。
