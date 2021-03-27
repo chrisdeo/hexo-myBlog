@@ -32,7 +32,7 @@ tags:
 &emsp;&emsp;根据网络上的整理，常见的处理都是做两步：
 
 1. 改写`Text`、`TextInput`这些涉及文本的组件；
-2. 下载平台规范的字体文件`ttf`格式，并`link`到`ios`和`android`内，在上述改写的属性内配置对应的`fontFamily`。
+2. 下载平台规范的字体文件`ttf`格式，并`link`到`ios`和`android`内，在上述改写的属性内配置对应的`fontFamily`。`link`也要区分RN版本，具体可以看[国外老哥这篇](https://ospfolio.com/two-way-to-change-default-font-family-in-react-native/#why-do-myapp-sometimes-get-texts-cut-off-on-some-android-phone)。
 
 #### 如何改写文本组件
 
