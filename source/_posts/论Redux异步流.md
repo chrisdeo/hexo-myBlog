@@ -257,3 +257,28 @@ const composeEnhancers = typeof window === 'object' && typeof window.__REDUX_DEV
 &emsp;&emsp;1. `store`本身的`dispatch`派发`action`更新数据这个动作是同步的；
 &emsp;&emsp;2. 所谓异步`action`，是通过引入中间件的方案增强`dispatch`后实现的。具体是`applyMiddleware`返回`dispatch`覆盖原始`store`的`dispatch`；
 &emsp;&emsp;3. 为何会采取这种中间件增强的模式，我个人看来一是集中在一个位置方便统一控制处理，另一个则是减少代码中的冗余判断模板；
+
+### 课后思考
+
+&emsp;&emsp;认真阅读文章的朋友，可能会有一个思考。
+
+&emsp;&emsp;**在`redux-thunk`、`redux-saga`这些中间件的编写范式中`next`和我们的`dispatch`到底有什么关系？**
+
+&emsp;&emsp;前文中，我们仅使用了`redux-thunk`来进行`applyMiddleware`能力的阐释，不过既然是中间件，我们大可以再添加一个比较常见的工具中间件`redux-logger`来进行结合说明。
+
+![](logger.jpg)
+
+&emsp;&emsp;可以看到`logger`实例的构造函数内，刨除对`console`是否存在的判断及是否作为`applyMiddleware`唯一参数的判断外，范式也是遵从`middlewareAPI`定义的。
+
+&emsp;&emsp;那么我们看一个常见应用场景，对我们每一个`dispatch`动作进行日志打印：
+
+```javascript
+const store = createStore(
+  reducer,
+  applyMiddleware(thunk, logger)
+);
+```
+
+&emsp;&emsp;`redux-logger`的使用必须放在中间件的最后一个，原因也很简单，它应该是包裹增强`dispatch`最近的一层，即发生调用时，输出日志，这就是它的功效。而根据源码中`compose`组合的高阶函数，`compose(A,B)(...args) => A(B(...args))`，也确实反应了这一点。
+
+&emsp;&emsp;那么我们回归主线，实际上第一层的`redux-logger`它返回的就是一个`action => { 定制打印能力...; return next(action) }`的箭头函数, 而这第一层的`next`实际上就是`store.dispatch`。综合来看，第一层中间件（我们这里是logger），就是在执行`dispatch`基础职能之上再额外定制了一些打印的能力，然后将这个增强的高阶函数HOC1（1层强化版dispatch），交给下一个中间件的`next`使用。最终走完整条中间件链。

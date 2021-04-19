@@ -339,3 +339,42 @@ require('promise/setimmediate/rejection-tracking').enable({
 ### RN的Modal须通过onRequestClose来响应安卓端的物理键返回回调
 
 &emsp;&emsp;说白了，在安卓平台中，Modal的隐藏直接通过`onRequestClose`控制。不使用`BackHandler.addEventListener('hardwareBackPress', () => {}`。
+
+### 字体粗细问题
+
+&emsp;&emsp;由于不同平台、不同版本、不同厂商的系统间应用的字体不尽相同，我们如果按照在web端的直觉去进行样式设计，关于粗细很可能就是直接一个`400`,`500`的值设上去了，然而真实情况是，同样一个`500`加粗值，在IOS上表现正常，而Android却要调到`700`才有效果。根据文档建议，在RN中关于粗细，我们应当直接使用`normal`或`bold`属性，它会自动去系统中匹配最接近的数值。
+
+![](fontWeight.jpg)
+
+### Text嵌套层级影响换行
+
+&emsp;&emsp;本意是根据官方的意思继承样式，不用嵌套内部的Text节点每个都应用样式；后发现这样会影响换行及显示：
+
+```javascript
+// has problem
+<Text>
+  <Text>
+  </Text>
+    <Text>
+  </Text>
+</Text>
+
+// prefer
+<View>
+  <Text>
+  </Text>
+  <Text>
+  </Text>
+</View>
+```
+
+### 内嵌样式与StyleSheet的区别
+
+&emsp;&emsp;直接在对象中编写样式和通过`StyleSheet.create`创建有什么差异？
+
+Performance:
+
+> &emsp;Making a stylesheet from a style object makes it possible to refer to it by ID instead of creating a new style object every time.
+It also allows to send the style only once through the bridge. All subsequent uses are going to refer an id (not implemented yet).
+anife
+&emsp;&emsp;即通过`StyleSheet`构建的样式对象能够通过ID的形式进行复用，不会在`rerender`中再进行渲染。

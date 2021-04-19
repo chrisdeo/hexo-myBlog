@@ -135,7 +135,7 @@ NexT.utils = NexT.$u = {
       'www.youtube.com',
       'player.vimeo.com',
       'player.youku.com',
-      'music.163.com',
+      // 'music.163.com',
       'www.tudou.com'
     ];
     var pattern = new RegExp(SUPPORTED_PLAYERS.join('|'));
@@ -188,16 +188,16 @@ NexT.utils = NexT.$u = {
         wrap.appendChild(iframe);
 
         // Additional adjustments for 163 Music
-        if (this.src.search('music.163.com') > 0) {
-          newDimension = getDimension($iframe);
-          var shouldRecalculateAspect = newDimension.width > oldDimension.width
-                                     || newDimension.height < oldDimension.height;
+        // if (this.src.search('music.163.com') > 0) {
+        //   newDimension = getDimension($iframe);
+        //   var shouldRecalculateAspect = newDimension.width > oldDimension.width
+        //                              || newDimension.height < oldDimension.height;
 
-          // 163 Music Player has a fixed height, so we need to reset the aspect radio
-          if (shouldRecalculateAspect) {
-            wrap.style.paddingTop = getAspectRadio(newDimension.width, oldDimension.height) + '%';
-          }
-        }
+        //   // 163 Music Player has a fixed height, so we need to reset the aspect radio
+        //   if (shouldRecalculateAspect) {
+        //     wrap.style.paddingTop = getAspectRadio(newDimension.width, oldDimension.height) + '%';
+        //   }
+        // }
       }
     });
 
