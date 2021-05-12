@@ -127,6 +127,10 @@ tags:
 ![](local.jpg)
 ![](remote.jpg)
 
+## 指定depth拉取仓库
+
+&emsp;&emsp;如`git clone xxx.git --depth=1`可以拉取最近一次提交`commit`代码的内容，以避免拉取整个项目不同分支的所有代码内容。这种方式比较适合阅读源码时使用，当然也可以指定分支拉取最近的一次提交：`git clone xxx.git --depth=1 --branch branchName`
+
 ## Git Flow规范
 
 via. [宇哲大佬](https://github.com/xingyuzhe/blog/issues/6)

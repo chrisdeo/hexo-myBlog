@@ -622,6 +622,8 @@ export default class Subscription {
 2. 如果是根订阅器，则我们直接使用`react-redux`的`store`自带的`subscribe`方法进行订阅，这个方法会在`store`内容改变时进行回调。同样这个`store`自带的订阅方式也会返回一个移除监听的句柄。
 3. 如果非根订阅器，就会走我们的`createListenerCollection`构造的链表节点的`subscribe`订阅方法，同样也会拿到取消订阅的句柄。这里要注意的是，如果存在父订阅器传入，实际上是在父订阅器上添加`callback`。
 
+## 总结
+
 &emsp;&emsp;看到这里，实际上`connect`要了解的代码也看得差不多了，我的疑惑是，我们不同组件的`connect`是如何关联到一起的呢？下面细品一下：
 
 1. HOC中通过`useMemo`获取一个`[subscription, notifyNestedSubs]`的tuple。每次`deps`更新，其中的实例和方法会重新生成和绑定。
@@ -732,13 +734,4 @@ function Provider({ store, context, children }) {
 }
 ```
 
-8. 综上，我们发现实际上进行`connect`的组件，内部是一个独立的`subscription`。并且其中的链表结构是为了处理多个HOC`connect`组件嵌套的消息同步的：
-
-```javascript
-<RootProvider>
-	<HOCConnA>
-		<HOCConnB>
-		</HOCConnB>
-	</HOCConnA>
-</RootProvider>
-```
+8. 综上，我们发现实际上进行`connect`的组件，内部是一个独立的`subscription`。在我们常规的使用场景下，`store`这个值来源于顶层的`ReactReduxContext.Provider`。于是我们在`connect`的组件内部能读取到**根的`subscription`**，并将其作为`Subscription`构造函数的第二个入参，即`parentSub`，传入当前`connect`组件自身构造的`subscription`实例当中。并且会调用`trySubscribe`，将当前组件的`checkForUpdates`绑定到根`subscription`（或者说父级的）实例的`listener`链表上，这样当上层发生变化时，通过`notify`方法，就会遍历整个链表触发所有有子孙关系的组件进行`rerender`（通过子组件自己的`forceComponentUpdateDispatch`)。具体细节，前文也有了分析，比如当前组件会将自身的`subscription`覆盖顶层在`contextValue`中传下来的`subscription`，并将重载后组装的`contextValue`通过当前HOC中的`Provider`传下去给我们`connect`的组件。
