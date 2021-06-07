@@ -222,8 +222,9 @@ function timerExpired() {
 
 ![](leading.jpg)
 
+&emsp;&emsp;根据流程图可以发现`leading`有两个前置判断，除了定时器还会多做一层执行时机的计算判断。并且这个定时器会在后续的流程中进行更新和清空。总体而言比我们实现的要复杂不少，当然其兼容了两种模式，并且很多通道都可以复用，多也是正常的。
 
-&emsp;&emsp;`throttle`的默认表现从源码上看其实就是同时启用`leading`、`trailing`并且配置了`maxWait`的`debounce`函数：
+&emsp;&emsp;下面我们瞅瞅`throttle`，它从源码上分析其实就是同时启用`leading`、`trailing`并且配置了`maxWait`的`debounce`函数，根据前面的源码和流程综合也好理解，就不进行冗余展开了：
 
 ```javascript
 function throttle(func, wait, options) {
