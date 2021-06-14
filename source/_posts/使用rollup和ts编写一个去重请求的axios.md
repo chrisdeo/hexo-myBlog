@@ -172,6 +172,7 @@ export default config
 
 ### 遇到的问题
 
+- `axios`的设计上，它关键的`Cancel`方法是直接挂到它默认导出的实例上去的（通过`axios.Cancel = require('./cancel/Cancel');`），**所以当我们调用`axios.create(config)`方法再创建一个新实例时，就会丢失那些原始默认导出实例上的绑定方法**，那些方法需要我们手动进行拷贝。
 - `Could not find a declaration file for module`：出现在安装我的方法库后，查阅资料后发现是我的`ts`缺少对文件的描述说明文件`typings.d.ts`。设置方案如下：
 
 ```javascript
