@@ -378,3 +378,7 @@ Performance:
 It also allows to send the style only once through the bridge. All subsequent uses are going to refer an id (not implemented yet).
 anife
 &emsp;&emsp;即通过`StyleSheet`构建的样式对象能够通过ID的形式进行复用，不会在`rerender`中再进行渲染。
+
+### Text在IOS侧没有提供类似word-break的能力
+
+&emsp;&emsp;`Android`有`textBreakStrategy`可以配置，`IOS`则没有提供入口。所以类似英文单词这种在超过宽度换行的情景下，一个完整单词可能被切成两部分显示。
